@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>NoSleep</string>
+	<key>CFBundleDisplayName</key>
+	<string>NoSleep</string>
+	<key>CFBundleExecutable</key>
+	<string>NoSleep</string>
+	<key>CFBundleIdentifier</key>
+	<string>dev.intuito.nosleep</string>
+	<!-- IconName picks the Liquid Glass icon in Assets.car; IconFile is the
+	     flat AppIcon.icns that macOS 14 and 15 fall back to. -->
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<!-- Both versions are stamped from the VERSION file by Scripts/bundle.sh. -->
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>0.0.0</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Intuito Studio</string>
+	<!-- Quitting has to switch sleep back on, so macOS may not kill the app
+	     silently to reclaim memory or at logout. -->
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
+</dict>
+</plist>
