@@ -7,6 +7,8 @@ import SwiftUI
 /// draws its own control.
 struct PanelView: View {
     let controller: Controller
+    var updater: Updater?
+    var openSettings: () -> Void = {}
 
     var body: some View {
         GlassGroup {
@@ -48,10 +50,8 @@ struct PanelView: View {
                     AccessUpdateRow(controller: controller)
                 }
 
-                HotspotRow(controller: controller)
-
-                if !controller.log.isEmpty {
-                    ActivityLog(events: controller.log)
+                if let updater, updater.state != .upToDate {
+                    UpdateRow(updater: updater)
                 }
 
                 footer
@@ -76,6 +76,9 @@ struct PanelView: View {
 
             Spacer()
 
+            Button("Settings…", action: openSettings)
+                .glassButton()
+                .keyboardShortcut(",")
             Button("Quit") { controller.quit() }
                 .glassButton()
                 .keyboardShortcut("q")
@@ -173,6 +176,47 @@ private struct StateCircle: View {
 
 // MARK: - Below the sliders
 
+/// A newer NoSleep, one button away. Installing takes a few seconds and ends
+/// with the app relaunching itself, so there is nothing to confirm.
+private struct UpdateRow: View {
+    let updater: Updater
+
+    var body: some View {
+        HStack(spacing: 10) {
+            switch updater.state {
+            case .upToDate:
+                EmptyView()
+            case .available(let version, _):
+                Image(systemName: "arrow.down.circle.fill")
+                    .foregroundStyle(Palette.amber)
+                Text("NoSleep \(version) is ready")
+                    .font(.system(size: 12))
+                Spacer(minLength: 0)
+                Button("Update") { updater.install() }
+                    .glassButton()
+            case .installing(let version):
+                ProgressView()
+                    .controlSize(.small)
+                Text("Updating to \(version)…")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+            case .failed(let message):
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text("Update didn't install: \(message)")
+                    .font(.system(size: 12))
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                Button("Retry") { updater.retry() }
+                    .glassButton()
+            }
+        }
+        .padding(12)
+        .glassTile()
+    }
+}
+
 private struct AccessUpdateRow: View {
     let controller: Controller
 
@@ -188,106 +232,6 @@ private struct AccessUpdateRow: View {
                 .glassButton()
         }
         .padding(12)
-        .glassTile()
-    }
-}
-
-/// Off until it is given a hotspot name. The password is optional: a hotspot
-/// this Mac has joined before is already in the system's keychain.
-private struct HotspotRow: View {
-    let controller: Controller
-    @State private var editing = false
-    @State private var name = ""
-    @State private var password = ""
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: "personalhotspot")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(controller.hotspotName == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(Palette.amber))
-                    .frame(width: 18)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("iPhone hotspot")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text(controller.hotspotName.map { "Joins \($0) if the Wi-Fi drops" } ?? "Off until set up")
-                        .font(.system(size: 11.5))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Spacer(minLength: 0)
-                if !editing {
-                    Button(controller.hotspotName == nil ? "Set up" : "Edit") {
-                        name = controller.hotspotName ?? ""
-                        password = ""
-                        editing = true
-                    }
-                    .glassButton()
-                }
-            }
-
-            if editing {
-                TextField("Hotspot name, as on the iPhone", text: $name)
-                    .textFieldStyle(.roundedBorder)
-                SecureField("Password (optional if joined before)", text: $password)
-                    .textFieldStyle(.roundedBorder)
-                HStack {
-                    if controller.hotspotName != nil {
-                        Button("Remove", role: .destructive) {
-                            controller.removeHotspot()
-                            editing = false
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.red)
-                    }
-                    Spacer()
-                    Button("Cancel") { editing = false }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
-                    Button("Save") {
-                        controller.saveHotspot(name: name, password: password)
-                        editing = false
-                    }
-                    .glassButton()
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
-                .font(.system(size: 12))
-            }
-        }
-        .padding(12)
-        .glassTile()
-    }
-}
-
-/// The last few things a session did, newest first, like a log read back in the morning.
-private struct ActivityLog: View {
-    let events: [SessionEvent]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Activity")
-                .font(.system(size: 13, weight: .semibold))
-            ForEach(events.suffix(5).reversed()) { event in
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text(event.at.formatted(date: .omitted, time: .shortened))
-                        .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(.tertiary)
-                        .frame(width: 58, alignment: .leading)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(event.title)
-                            .font(.system(size: 12, weight: .medium))
-                        if !event.detail.isEmpty {
-                            Text(event.detail)
-                                .font(.system(size: 11.5))
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
         .glassTile()
     }
 }

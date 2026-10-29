@@ -14,15 +14,20 @@ import SwiftUI
 final class StatusPanel: NSObject {
     private let controller: Controller
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    private let panel: Panel
+    private let panel = Panel()
+    private let settings: SettingsWindow
     private var outsideClicks: Any?
     /// Where the panel's top edge sits, kept while its content grows or shrinks.
     private var top: CGFloat = 0
 
-    init(controller: Controller) {
+    init(controller: Controller, updater: Updater) {
         self.controller = controller
-        panel = Panel(controller: controller)
+        settings = SettingsWindow(controller: controller)
         super.init()
+        panel.show(PanelView(controller: controller, updater: updater) { [weak self] in
+            self?.close()
+            self?.settings.show()
+        })
         item.button?.target = self
         item.button?.action = #selector(toggle)
         item.button?.imagePosition = .imageLeading
@@ -59,8 +64,8 @@ final class StatusPanel: NSObject {
         outsideClicks = nil
     }
 
-    /// The hotspot editor and the activity list change the panel's height;
-    /// keep its top under the menu bar rather than its bottom where it was.
+    /// A problem line or the access row changes the panel's height; keep its
+    /// top under the menu bar rather than its bottom where it was.
     @objc private func panelResized() {
         guard panel.isVisible, abs(panel.frame.maxY - top) > 0.5 else { return }
         panel.setFrameOrigin(NSPoint(x: panel.frame.minX, y: top - panel.frame.height))
@@ -94,7 +99,7 @@ final class StatusPanel: NSObject {
 
     /// Clear and borderless; the shadow follows the glass sheet's own shape.
     private final class Panel: NSPanel {
-        init(controller: Controller) {
+        init() {
             super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel],
                        backing: .buffered, defer: true)
             isOpaque = false
@@ -104,13 +109,16 @@ final class StatusPanel: NSObject {
             collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle]
             isReleasedWhenClosed = false
             hidesOnDeactivate = false
+        }
+
+        func show(_ view: PanelView) {
             // A controller, so the window follows the panel's size as it changes.
-            let host = NSHostingController(rootView: PanelView(controller: controller))
+            let host = NSHostingController(rootView: view)
             host.sizingOptions = [.preferredContentSize]
             contentViewController = host
         }
 
-        // Key, so the hotspot's text fields take typing and Esc closes it.
+        // Key, so Esc closes it and ⌘, and ⌘Q reach its buttons.
         override var canBecomeKey: Bool { true }
 
         override func cancelOperation(_ sender: Any?) {
@@ -119,8 +127,8 @@ final class StatusPanel: NSObject {
     }
 
     #if DEBUG
-    /// `NOSLEEP_PANEL_PROBE=<dir>` opens the real panel at launch and writes a
-    /// capture of it there, glass and all.
+    /// `NOSLEEP_PANEL_PROBE=<dir>` opens the real panel at launch, then the
+    /// Settings window, and writes a capture of each there, glass and all.
     func probe(to directory: URL) {
         // The status item has no window of its own until the menu bar lays it out.
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { self.open() }
@@ -130,6 +138,13 @@ final class StatusPanel: NSObject {
                 try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?
                     .write(to: directory.appendingPathComponent("panel.png"))
             }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { self.close(); self.settings.show() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+            guard let window = NSApp.windows.first(where: { $0.title == "NoSleep Settings" }),
+                  let image = Snapshots.captureOwnWindow(window) else { return }
+            try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?
+                .write(to: directory.appendingPathComponent("settings.png"))
         }
     }
     #endif

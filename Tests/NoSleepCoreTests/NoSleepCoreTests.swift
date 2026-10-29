@@ -141,3 +141,19 @@ struct RuleTests {
         #expect(compiled, "\(error ?? [:])")
     }
 }
+
+@Suite("Which release is newer")
+struct VersionTests {
+    @Test("A higher part wins, compared as numbers rather than text")
+    func numeric() {
+        #expect(Version.isNewer("1.0.1", than: "1.0.0"))
+        #expect(Version.isNewer("1.10.0", than: "1.9.0"))
+        #expect(!Version.isNewer("1.9.0", than: "1.10.0"))
+    }
+
+    @Test("The same release is never offered as an update, however it is written")
+    func same() {
+        #expect(!Version.isNewer("1.2.0", than: "1.2.0"))
+        #expect(!Version.isNewer("v1.2", than: "1.2.0"))
+    }
+}

@@ -77,22 +77,26 @@ external mic.
   crashed or been force-quit while holding sleep off, it switches sleep, Low
   Power Mode and the mute back. It never touches a session the terminal started.
 
-### iPhone hotspot
+### Staying online
 
-Off until you set it up in the panel. Give it your hotspot's name, as the
-iPhone shows it. The password is optional if this Mac has joined that hotspot
-before. During a session, if the network has been gone for 30 seconds, NoSleep
-joins the hotspot, and tries again every minute until it is back. The password
-stays in your login Keychain.
+NoSleep keeps the Mac awake; macOS keeps it connected. To fall back to your
+iPhone when the Wi-Fi drops, set **System Settings → Wi-Fi → Ask to join
+hotspots** to **Automatic**. The iPhone needs the same Apple Account.
 
 ### Activity
 
-The panel lists the last few things a session did: when the lid closed and
-opened, what changed, and why a session ended.
+**Settings…** in the panel lists what recent sessions did: when the lid closed
+and opened, what changed, and why a session ended.
+
+### Updates
+
+NoSleep checks for a new release once a day. When there is one, a notification
+and the panel both offer **Update**: one click, and it restarts on the new
+version a few seconds later, still keeping the Mac awake if it was.
 
 Quitting NoSleep switches sleep back on if NoSleep was the one holding it off.
 
-Features 1 to 6 and the hotspot follow [Insomnia](https://github.com/krishhgg/Insomnia)
+Features 1 to 6 follow [Insomnia](https://github.com/krishhgg/Insomnia)
 (MIT), which got there first.
 
 ## How it works

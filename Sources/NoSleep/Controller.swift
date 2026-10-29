@@ -1,5 +1,4 @@
 import AppKit
-import Network
 import NoSleepCore
 import Observation
 import ServiceManagement
@@ -14,10 +13,6 @@ final class Controller {
     ]
     /// The battery slider's stops, nil first: dragging to the left end turns it off.
     static let batteryFloorChoices: [Int?] = [nil, 5, 10, 15, 20, 25, 30, 40, 50]
-    /// How long the network has to be gone before the hotspot is tried, and how
-    /// long between tries while it stays gone.
-    static let hotspotAfter: TimeInterval = 30
-    static let hotspotRetry: TimeInterval = 60
 
     /// What the system says, not what we last asked for: the terminal's `nosleep`
     /// changes the same setting, and the panel should show that too.
@@ -32,7 +27,6 @@ final class Controller {
     private(set) var lastStop: (at: Date, reason: Limits.StopReason)?
     private(set) var problem: String?
     private(set) var log: [SessionEvent] = []
-    private(set) var hotspotName: String?
 
     /// Set when this app switched sleep off, cleared when it switches it back.
     /// Only a session we own is restored on quit or by the backstop; one started
@@ -78,10 +72,6 @@ final class Controller {
     private var lidClosed = false
     private var ticker: Timer?
     private var activity: NSObjectProtocol?
-    private var network: NWPathMonitor?
-    private var offlineSince: Date?
-    private var lastHotspotTry: Date?
-    private var joiningHotspot = false
 
     init(defaults: UserDefaults = .standard, live: Bool = true) {
         self.defaults = defaults
@@ -99,11 +89,9 @@ final class Controller {
         guard live else { return }
 
         log = SessionLog.load(defaults)
-        hotspotName = Hotspot.name
         ruleIsCurrent = SleepSwitch.hasCurrentRule || !SleepSwitch.hasPasswordFreeAccess
         // The lid's state at launch is where we start from, not a change to act on.
         lidClosed = SleepSwitch.isLidClosedAndWouldSleep
-        watchNetwork()
 
         tick()
         // Every 2 s keeps the panel in step with a `nosleep` typed in the
@@ -150,16 +138,6 @@ final class Controller {
         }
         ruleIsCurrent = SleepSwitch.hasCurrentRule
         tick()
-    }
-
-    func saveHotspot(name: String, password: String) {
-        Hotspot.save(name: name, password: password)
-        hotspotName = Hotspot.name
-    }
-
-    func removeHotspot() {
-        Hotspot.remove()
-        hotspotName = nil
     }
 
     func setLaunchesAtLogin(_ enabled: Bool) {
@@ -291,7 +269,6 @@ final class Controller {
         }
         followLid()
         followLowPower()
-        followNetwork()
         holdOffAppNap(isAwake)
     }
 
@@ -349,45 +326,6 @@ final class Controller {
         }
     }
 
-    // MARK: - Hotspot
-
-    private func watchNetwork() {
-        let monitor = NWPathMonitor()
-        monitor.pathUpdateHandler = { [weak self] path in
-            let online = path.status == .satisfied
-            Task { @MainActor in
-                guard let self else { return }
-                if online {
-                    self.offlineSince = nil
-                    self.lastHotspotTry = nil
-                } else if self.offlineSince == nil {
-                    self.offlineSince = Date()
-                }
-            }
-        }
-        monitor.start(queue: .main)
-        network = monitor
-    }
-
-    private func followNetwork() {
-        guard isAwake, let name = hotspotName, !joiningHotspot,
-              let offlineSince, now.timeIntervalSince(offlineSince) >= Self.hotspotAfter
-        else { return }
-        if let lastHotspotTry, now.timeIntervalSince(lastHotspotTry) < Self.hotspotRetry { return }
-        lastHotspotTry = now
-        joiningHotspot = true
-        DispatchQueue.global(qos: .utility).async {
-            let result = Hotspot.join(name)
-            Task { @MainActor in
-                self.joiningHotspot = false
-                switch result {
-                case .success: self.record("Joined hotspot", "\(name), Wi-Fi had dropped")
-                case .failure(let error): self.record("Couldn't join hotspot", "\(name): \(error.message)")
-                }
-            }
-        }
-    }
-
     // MARK: - Telling the user
 
     private func record(_ title: String, _ detail: String = "") {
@@ -440,8 +378,7 @@ extension Controller {
         ruleIsCurrent: Bool = true,
         lastStop: (Date, Limits.StopReason)? = nil,
         problem: String? = nil,
-        log: [SessionEvent] = [],
-        hotspotName: String? = nil
+        log: [SessionEvent] = []
     ) -> Controller {
         let controller = Controller(defaults: UserDefaults(suiteName: "nosleep.preview")!, live: false)
         let now = Date()
@@ -463,7 +400,6 @@ extension Controller {
         controller.lastStop = lastStop.map { (at: $0.0, reason: $0.1) }
         controller.problem = problem
         controller.log = log
-        controller.hotspotName = hotspotName
         return controller
     }
 

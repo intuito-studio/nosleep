@@ -25,16 +25,22 @@ enum Snapshots {
             ("charging", .preview(awake: true, power: PowerSource(batteryPercent: 8, onBattery: false), batteryFloor: nil)),
             ("desktop", .preview(awake: true, power: PowerSource(batteryPercent: nil, onBattery: false))),
             ("night", .preview(
-                awake: true, duration: 8 * 3600, elapsed: 4 * 3600, hotspotName: "Morris's iPhone"
+                awake: true, duration: 8 * 3600, elapsed: 4 * 3600
             ).withLog(night)),
             ("update", .preview(awake: false, ruleIsCurrent: false)),
         ]
+        let update = Updater.preview(.available(version: "1.1.0", dmg: URL(string: "https://example.com")!))
         let window = SnapshotWindow()
         for (name, controller) in states {
             for dark in [false, true] {
-                write(MenuPanel(dark: dark) { PanelView(controller: controller) },
+                write(MenuPanel(dark: dark) { PanelView(controller: controller, updater: name == "update" ? update : nil) },
                       dark: dark, in: window, to: directory.appendingPathComponent("\(name)-\(dark ? "dark" : "light").png"))
             }
+        }
+        let settings = Controller.preview(awake: true).withLog(night)
+        for dark in [false, true] {
+            write(SettingsView(controller: settings), dark: dark, in: window,
+                  to: directory.appendingPathComponent("settings-\(dark ? "dark" : "light").png"))
         }
         window.orderOut(nil)
     }
@@ -44,7 +50,6 @@ enum Snapshots {
         return [
             SessionEvent(at: start, title: "Kept awake", detail: "for 8 hours"),
             SessionEvent(at: start.addingTimeInterval(124), title: "Lid closed", detail: "display off · audio muted · low power on"),
-            SessionEvent(at: start.addingTimeInterval(3 * 3600), title: "Joined hotspot", detail: "Morris's iPhone, Wi-Fi had dropped"),
             SessionEvent(at: start.addingTimeInterval(7.8 * 3600), title: "Lid opened", detail: "audio unmuted · low power off"),
         ]
     }()

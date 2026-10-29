@@ -77,6 +77,21 @@ menu bar images are templates; colour on the grey menu bar cost contrast. The
 panel badge is brown with yellow eyes when awake. `make icon` compiles
 CatGlyph.swift on its own and redraws the icon's head and eyes layers.
 
+**The panel is for switching.** The full activity log lives in
+`SettingsView`, an AppKit-owned window opened from the panel's Settings…
+button. The SwiftUI scene is a `MenuBarExtra` that is never inserted: a
+`Settings` scene there opened as an empty window at launch. Joining a network
+is left to macOS (Wi-Fi → Ask to join hotspots → Automatic); an earlier
+hotspot feature was removed.
+
+**Updates are one click.** `Updater` reads the latest GitHub release once a
+day, and its `NoSleep.dmg` asset is what gets installed: keep that asset name
+and the `v<version>` tag. Update (in the panel, or the notification) downloads
+it, swaps the bundle in place and relaunches, without undoing the session; the
+new copy carries it on from the defaults. Debug builds only check when
+`NOSLEEP_UPDATE_FEED` names a feed (a file:// JSON shaped like GitHub's works),
+and `NOSLEEP_INSTALL_UPDATE=1` installs without the click.
+
 **The panel is the system's own UI.** Liquid Glass tiles (`glassEffect`), the
 native `Slider` and `Toggle`, the `.glass` button style. Don't draw custom
 controls or use gradients. Everything glass sits behind an `if #available(macOS 26, *)`
