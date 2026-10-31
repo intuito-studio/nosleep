@@ -20,9 +20,9 @@ final class StatusPanel: NSObject {
     /// Where the panel's top edge sits, kept while its content grows or shrinks.
     private var top: CGFloat = 0
 
-    init(controller: Controller, updater: Updater) {
+    init(controller: Controller, updater: Updater, lidEffect: LidEffect) {
         self.controller = controller
-        settings = SettingsWindow(controller: controller)
+        settings = SettingsWindow(controller: controller, lidEffect: lidEffect)
         super.init()
         panel.show(PanelView(controller: controller, updater: updater) { [weak self] in
             self?.close()

@@ -64,6 +64,9 @@ final class Controller {
         didSet { defaults.set(mutedByUs, forKey: StateKey.mutedByUs) }
     }
 
+    /// Told on every tick whether sleep is off, for the lid effect.
+    @ObservationIgnored var onAwake: ((Bool) -> Void)?
+
     private let defaults: UserDefaults
     private let live: Bool
     /// After a stop that could not run without a password, wait for a click
@@ -251,6 +254,7 @@ final class Controller {
         power = .current
         thermal = ProcessInfo.processInfo.thermalState
         isAwake = SleepSwitch.isSleepDisabled
+        onAwake?(isAwake)
         hasPasswordFreeAccess = SleepSwitch.hasPasswordFreeAccess
         launchesAtLogin = SMAppService.mainApp.status == .enabled
 

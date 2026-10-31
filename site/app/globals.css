@@ -1,0 +1,1248 @@
+/* NoSleep's page. Dark is the default because the subject is a Mac at night
+   with its lid shut; light follows the visitor's setting. The hero stays
+   dark either way: it is a scene, not a surface. */
+
+:root {
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), "Helvetica Neue", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter), "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --accent: #ff9f0a;
+  --on-accent: #1d1d1f;
+  --cat: #5c4530;
+
+  --gutter: clamp(16px, 4vw, 40px);
+  --wide: 1120px;
+
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #111113;
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #86868b;
+  --hair: rgba(255, 255, 255, 0.12);
+  --code-bg: rgba(255, 255, 255, 0.08);
+  --desk: #0e0e12;
+  --menubar: rgba(255, 255, 255, 0.06);
+  --panel: #262a37;
+  --tile: #363b4c;
+  --tile-edge: rgba(255, 255, 255, 0.07);
+  --tile-2: #4a5064;
+  --track: rgba(255, 255, 255, 0.16);
+  --tick: rgba(255, 255, 255, 0.22);
+  --thumb: #c7c7cc;
+  --nav: rgba(0, 0, 0, 0.66);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #fbfbfd;
+    --surface: #ffffff;
+    --ink: #1d1d1f;
+    --ink-2: #5e5e63;
+    --ink-3: #6e6e73;
+    --hair: rgba(0, 0, 0, 0.1);
+    --code-bg: rgba(0, 0, 0, 0.05);
+    --accent: #c45c00;
+    --desk: #e9e9ee;
+    --menubar: rgba(255, 255, 255, 0.7);
+    --panel: #f2f2f5;
+    --tile: #ffffff;
+    --tile-edge: rgba(0, 0, 0, 0.06);
+    --tile-2: #e5e5ea;
+    --track: rgba(0, 0, 0, 0.1);
+    --tick: rgba(0, 0, 0, 0.18);
+    --thumb: #ffffff;
+    --nav: rgba(251, 251, 253, 0.74);
+  }
+}
+
+/* The hero is always night. */
+.hero,
+.nav {
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #86868b;
+  --hair: rgba(255, 255, 255, 0.14);
+  --accent: #ff9f0a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Lenis smooths the scroll; native smooth scrolling would fight it. */
+  scroll-padding-top: 64px;
+  scrollbar-color: var(--ink-3) var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--accent);
+}
+
+::selection {
+  background: color-mix(in srgb, #ff9f0a 38%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid #ff9f0a;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display);
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+  margin: 0;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+
+p code,
+.fine code {
+  white-space: nowrap;
+  background: var(--code-bg);
+  padding: 0.12em 0.38em;
+  border-radius: 6px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ───────── Buttons ───────── */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button.primary {
+  background: #ff9f0a;
+  color: var(--on-accent);
+}
+
+.button.quiet {
+  color: var(--ink);
+  border: 1px solid var(--hair);
+}
+
+.button.small {
+  min-height: 30px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button.primary:hover {
+    background: #ffb340;
+  }
+  .button.quiet:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+/* ───────── Liquid glass ─────────
+   Clear glass, not frosted plastic: a light blur, boosted saturation so what
+   is behind it stays itself, a bright specular rim on top and a faint one
+   below, as Apple's Liquid Glass reads. Where the browser can refract
+   (Chromium), GlassFilter adds the lens bend at the edges. */
+
+.glass {
+  --glass-tint: rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02) 46%, rgba(255, 255, 255, 0.04)),
+    var(--glass-tint);
+  backdrop-filter: blur(10px) saturate(190%) brightness(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(190%) brightness(1.08);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0.5px rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 18px rgba(255, 255, 255, 0.05),
+    0 10px 36px rgba(0, 0, 0, 0.32);
+}
+
+html.refracts .glass {
+  backdrop-filter: url(#liquid-glass) blur(6px) saturate(190%) brightness(1.08);
+}
+
+/* The panel's glass sits over a bright horizon; a softer read keeps it calm. */
+.panel.glass {
+  backdrop-filter: blur(18px) saturate(170%) brightness(1.05);
+  -webkit-backdrop-filter: blur(18px) saturate(170%) brightness(1.05);
+}
+
+html.refracts .panel.glass {
+  backdrop-filter: url(#liquid-glass) blur(16px) saturate(170%) brightness(1.05);
+}
+
+/* ───────── Nav ───────── */
+
+.nav {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 10;
+  width: min(760px, calc(100% - 24px));
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px 0 18px;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: 14px;
+  --glass-tint: rgba(18, 18, 22, 0.62);
+  transition:
+    opacity 400ms var(--ease-out),
+    translate 500ms var(--ease-out);
+}
+
+@media (prefers-color-scheme: light) {
+  .nav {
+    --glass-tint: rgba(18, 18, 22, 0.82);
+  }
+}
+
+/* Inside the hero's Mac, its menu bar is the only bar. */
+html[data-in-hero] .nav {
+  opacity: 0;
+  translate: -50% -16px;
+  pointer-events: none;
+}
+
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.nav-cat {
+  width: 20px;
+  height: auto;
+  display: block;
+}
+
+.nav nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.nav nav a:not(.button) {
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.nav .button.small {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav nav a:not(.button):hover {
+    color: var(--ink);
+  }
+}
+
+/* ───────── Downloads ───────── */
+
+.downloads {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.logo-glyph {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  flex: none;
+  margin-right: 8px;
+  translate: 0 -0.06em;
+}
+
+.button.small .logo-glyph {
+  margin-right: 6px;
+}
+
+.glass-button {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  border: 0;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  .install .glass-button {
+    background: rgba(0, 0, 0, 0.04);
+    box-shadow: inset 0 0 0 1px var(--hair);
+  }
+}
+
+.glass-button:disabled {
+  cursor: not-allowed;
+  color: var(--ink-2);
+}
+
+.glass-button:disabled:active {
+  transform: none;
+}
+
+.soon {
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ───────── Hero ───────── */
+
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 30%, #0b0d16 0%, #000 70%);
+  color: var(--ink);
+}
+
+.hero-layer,
+.hero-stage,
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hero-stage {
+  z-index: 1;
+}
+
+.hero-layer.front {
+  z-index: 2;
+  pointer-events: none;
+}
+
+.hero-canvas {
+  opacity: 0;
+}
+
+/* The copy on the Mac's screen: centred in its sky, carried by the camera. */
+.hero-open {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.hero-screen-copy {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  padding: 0 var(--gutter);
+  margin-top: -6vh;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  pointer-events: auto;
+  text-shadow: 0 2px 30px rgba(5, 10, 30, 0.45);
+}
+
+.hero h1,
+.display {
+  font-size: clamp(2.75rem, 7.4vw, 6rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.display.accent {
+  color: #ffd13d;
+  text-shadow: 0 0 40px rgba(255, 209, 61, 0.35);
+}
+
+.hero .lede {
+  margin-top: 20px;
+  max-width: 30em;
+  color: rgba(235, 238, 255, 0.78);
+}
+
+.hero .fine {
+  margin-top: 18px;
+  color: rgba(235, 238, 255, 0.55);
+}
+
+.hero-shut {
+  position: absolute;
+  z-index: 3;
+  top: clamp(84px, 12vh, 140px);
+  left: 0;
+  right: 0;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .hero h1,
+  .display {
+    font-size: clamp(2.4rem, 12vw, 3.1rem);
+  }
+  .hero .lede {
+    font-size: 1.0625rem;
+    margin-top: 14px;
+  }
+  .hero .downloads {
+    margin-top: 22px;
+  }
+  /* Below the panel, which hangs from the menu bar on a phone's crop. */
+  .hero-screen-copy {
+    margin-top: 22vh;
+  }
+  .hero .button {
+    min-height: 44px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+}
+
+.fine {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.hero-status {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: clamp(20px, 5vh, 56px);
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 18px 7px 7px;
+  border-radius: 999px;
+  font-size: 15px;
+  white-space: nowrap;
+  opacity: 0;
+  color: var(--ink-2);
+}
+
+.hero-status strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.hero-status .badge {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ff9f0a;
+}
+
+.hero-status .badge svg {
+  width: 19px;
+}
+
+/* The hinge angle while the lid comes down, as the lid sensor reads it. */
+.hero-angle {
+  position: absolute;
+  z-index: 3;
+  right: clamp(16px, 4vw, 48px);
+  bottom: clamp(20px, 5vh, 56px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  opacity: 0;
+}
+
+.hero-angle svg {
+  color: #ffd13d;
+}
+
+/* ───────── Sections ───────── */
+
+.section {
+  padding: clamp(96px, 12vw, 168px) var(--gutter) 0;
+  max-width: calc(var(--wide) + 2 * var(--gutter));
+  margin: 0 auto;
+}
+
+.section-head {
+  max-width: 680px;
+  margin-bottom: clamp(40px, 6vw, 64px);
+}
+
+.section-head.center {
+  margin-inline: auto;
+  text-align: center;
+}
+
+h2 {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+
+.lede {
+  margin-top: 18px;
+  font-size: clamp(1.125rem, 1.6vw, 1.3125rem);
+  line-height: 1.42;
+  color: var(--ink-2);
+  max-width: 36em;
+}
+
+.section-head.center .lede {
+  margin-inline: auto;
+}
+
+.body {
+  margin-top: 16px;
+  color: var(--ink-2);
+  max-width: 36em;
+}
+
+.narrow {
+  max-width: 36em;
+  margin-top: 20px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(40px, 6vw, 88px);
+  align-items: start;
+}
+
+.split .section-head {
+  margin-bottom: 0;
+}
+
+@media (max-width: 860px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ───────── The panel, live ───────── */
+
+.playground {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .playground {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The panel sits on the hero Mac's own wallpaper, so its glass has
+   something to bend. */
+.desktop {
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --ink-2: rgba(235, 238, 255, 0.72);
+  --ink-3: rgba(235, 238, 255, 0.55);
+  --tile-edge: rgba(255, 255, 255, 0.14);
+  --track: rgba(255, 255, 255, 0.22);
+  --tick: rgba(255, 255, 255, 0.3);
+  --thumb: #f2f2f7;
+  --tile-2: rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: #0d1530 url("/wallpaper-small.webp") center 62% / cover;
+  padding-bottom: 36px;
+  overflow: hidden;
+  color: var(--ink);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.menubar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0));
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.menubar-left,
+.menubar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  white-space: nowrap;
+}
+
+.menubar-left b {
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .menubar-left span {
+    display: none;
+  }
+}
+
+.menubar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.menubar-item.is-open {
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
+}
+
+.menubar-cat {
+  width: 17px;
+  display: block;
+}
+
+.panel {
+  width: min(372px, calc(100% - 24px));
+  margin: 8px 12px 0 auto;
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+  /* The sheet's corner is the tile's plus the gap, as in the app. */
+  border-radius: 28px;
+}
+
+.tile {
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.35),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  padding: 16px;
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+
+.switch:active {
+  transform: scale(0.98);
+}
+
+.switch-text {
+  display: grid;
+  gap: 2px;
+}
+
+.switch-text strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.switch-text span {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.badge-ring {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 64px;
+}
+
+.badge-ring > svg {
+  position: absolute;
+  inset: 0;
+  rotate: -90deg;
+}
+
+.badge-ring circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+.ring-track {
+  stroke: var(--track);
+}
+
+.ring-fill {
+  stroke: #ff9f0a;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 700ms var(--ease-out);
+}
+
+.badge-ring[data-awake="true"] .ring-fill {
+  stroke-dashoffset: 18;
+}
+
+.badge-face {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--tile-2);
+  color: var(--ink);
+  transition: background-color 300ms ease;
+}
+
+.badge-ring[data-awake="true"] .badge-face {
+  background: #ff9f0a;
+}
+
+.badge-face svg {
+  width: 60%;
+}
+
+.sliders {
+  display: grid;
+  gap: 18px;
+}
+
+.stop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.stop-head label {
+  font-weight: 600;
+}
+
+.stop-value {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
+.stop-detail {
+  color: var(--ink-3);
+  font-size: 13px;
+  font-weight: 400;
+  margin-right: 8px;
+}
+
+.stop-track {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.icon-fill {
+  fill: var(--ink-3);
+  stroke: none;
+}
+
+.range {
+  position: relative;
+  display: block;
+  height: 28px;
+}
+
+.ticks {
+  position: absolute;
+  inset: 0 9px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.ticks i {
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: var(--tick);
+}
+
+.range input {
+  position: relative;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.range input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--track);
+}
+
+.range input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--track);
+}
+
+.range input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 26px;
+  margin-top: -11px;
+  border-radius: 9px;
+  background: var(--thumb);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    0 0 0 0.5px rgba(0, 0, 0, 0.2);
+  transition: transform 160ms var(--ease-out);
+}
+
+.range input::-moz-range-thumb {
+  width: 18px;
+  height: 26px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--thumb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.range input:active::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+
+.range input:focus-visible {
+  outline: none;
+}
+
+.range input:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid #ff9f0a;
+  outline-offset: 2px;
+}
+
+.range input:focus-visible::-moz-range-thumb {
+  outline: 2px solid #ff9f0a;
+  outline-offset: 2px;
+}
+
+.chart {
+  margin: 0;
+}
+
+.chart canvas {
+  display: block;
+  width: 100%;
+  height: clamp(240px, 30vw, 320px);
+  transition: opacity 300ms ease;
+}
+
+.chart[data-off="true"] canvas {
+  opacity: 0.3;
+}
+
+.chart figcaption {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+  padding-left: 44px;
+}
+
+.chart-summary {
+  font-size: 17px;
+  min-height: 3em;
+}
+
+.chart-note {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* ───────── Lid table ───────── */
+
+.lid-table {
+  width: 100%;
+  max-width: 880px;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+
+.lid-table th,
+.lid-table td {
+  text-align: left;
+  padding: 18px 16px 18px 0;
+  border-bottom: 1px solid var(--hair);
+  vertical-align: top;
+}
+
+.lid-table thead th {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-3);
+  padding-top: 0;
+}
+
+.lid-table tbody th {
+  font-weight: 600;
+  width: 32%;
+}
+
+.lid-table td:nth-child(3) {
+  color: var(--ink-2);
+}
+
+/* ───────── Rules ───────── */
+
+.rules {
+  margin: 0;
+  padding: 8px 24px;
+  border-radius: 28px;
+}
+
+.rules > div {
+  padding: 18px 0;
+}
+
+.rules > div + div {
+  border-top: 1px solid var(--hair);
+}
+
+/* ───────── Forest band ───────── */
+
+.band {
+  position: relative;
+  margin-top: clamp(96px, 12vw, 168px);
+  isolation: isolate;
+}
+
+.band.bag {
+  color-scheme: dark;
+  --ink: #f5f5f7;
+  --ink-2: rgba(235, 238, 255, 0.72);
+  --ink-3: rgba(235, 238, 255, 0.55);
+  --hair: rgba(255, 255, 255, 0.14);
+  --accent: #ff9f0a;
+  color: var(--ink);
+  padding-bottom: clamp(96px, 12vw, 168px);
+  background:
+    linear-gradient(180deg, var(--bg) 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 70%, var(--bg) 100%),
+    radial-gradient(70% 55% at 0% 10%, rgba(2, 4, 12, 0.75), rgba(2, 4, 12, 0) 70%),
+    #050812 url("/bag.webp") 18% 60% / cover;
+}
+
+.band .section {
+  margin-top: 0;
+}
+
+.rules dt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.rules dd {
+  margin: 4px 0 0;
+  padding-left: 36px;
+  color: var(--ink-2);
+}
+
+/* ───────── Code ───────── */
+
+.command pre {
+  margin: 0;
+  overflow-x: auto;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.command-line {
+  display: block;
+  white-space: pre;
+}
+
+/* ───────── Install ───────── */
+
+.install {
+  padding-bottom: clamp(96px, 12vw, 160px);
+}
+
+.app-icon {
+  display: block;
+  margin: 0 auto 20px;
+  width: 112px;
+}
+
+.methods {
+  max-width: 880px;
+  margin: 0 auto;
+  display: grid;
+  gap: 28px;
+}
+
+.method {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.method h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 600;
+  padding-top: 13px;
+}
+
+@media (max-width: 640px) {
+  .method {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .method h3 {
+    padding-top: 0;
+  }
+}
+
+.command {
+  position: relative;
+}
+
+.command pre {
+  padding: 12px 84px 12px 18px;
+}
+
+@media (max-width: 640px) {
+  .command pre {
+    padding: 48px 18px 12px;
+  }
+}
+
+.copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  min-width: 64px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+
+.copy:active {
+  transform: scale(0.96);
+}
+
+.copy-label {
+  grid-area: 1 / 1;
+  align-self: center;
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
+}
+
+.copy-done {
+  opacity: 0;
+  filter: blur(3px);
+  color: var(--accent);
+}
+
+.copy[data-copied="true"] .copy-idle {
+  opacity: 0;
+  filter: blur(3px);
+}
+
+.copy[data-copied="true"] .copy-done {
+  opacity: 1;
+  filter: blur(0);
+}
+
+.download {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+/* ───────── Footer ───────── */
+
+.footer {
+  max-width: calc(var(--wide) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: 28px var(--gutter) 48px;
+  border-top: 1px solid var(--hair);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 560px) {
+  .nav nav a[href="#install"] {
+    display: none;
+  }
+}
+
+/* ───────── Line icons ───────── */
+
+.icon-line {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-line .icon-fill {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
