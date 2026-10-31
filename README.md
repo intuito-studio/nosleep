@@ -13,6 +13,8 @@ good, for a set time, or until the battery reaches a level you pick.
 **Homebrew**
 
 ```sh
+brew tap intuito-studio/tap
+brew trust --cask intuito-studio/tap/nosleep
 brew install --cask intuito-studio/tap/nosleep
 ```
 
@@ -65,6 +67,17 @@ set yourself stays. The timer keeps running throughout. The built-in microphone
 is cut off in hardware while the lid is closed, so record with AirPods or an
 external mic.
 
+### Closing the lid
+
+On a MacBook with a lid angle sensor, the cat comes up from below the screen
+in Liquid Glass as the lid passes upright during a session, its paws over the
+bottom edge and its lit eyes following the pointer: a sign NoSleep is holding
+on. **Fold the screen as the lid closes**,
+in Settings, adds Mac Duo's fold: the desktop holds still while the lid turns
+around it, frosting and darkening from the top. The fold needs Screen
+Recording, asked for when you switch it on. Nothing shows with NoSleep off or
+with the lid open as usual.
+
 ### Safety rules
 
 - **Battery:** below 40% on battery, Low Power Mode goes on. At the stop you
@@ -98,6 +111,14 @@ Quitting NoSleep switches sleep back on if NoSleep was the one holding it off.
 
 Features 1 to 6 follow [Insomnia](https://github.com/krishhgg/Insomnia)
 (MIT), which got there first.
+
+## Acknowledgements
+
+The fold, the hinge angle maths and the lid sensor reader are ported from
+[Mac Duo](https://github.com/ninobc/mac-duo) by Nino Bouchedid (MIT; the
+notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)). The lid angle
+sensor's HID interface was first documented by
+[Sam Henri Gold](https://github.com/samhenrigold/LidAngleSensor).
 
 ## How it works
 

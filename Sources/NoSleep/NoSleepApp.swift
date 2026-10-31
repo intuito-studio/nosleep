@@ -30,6 +30,7 @@ struct NoSleepApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     let controller = Controller()
     let updater = Updater()
+    let lidEffect = LidEffect()
     private var statusPanel: StatusPanel?
     private var terminationSignal: DispatchSourceSignal?
     /// Quitting to make way for a newer copy, which takes the session over.
@@ -41,6 +42,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             Snapshots.render(to: URL(fileURLWithPath: directory))
             exit(0)
         }
+        // Alone, like the snapshots: no menu bar item, and it leaves without
+        // the restore on quit, so it can run beside a NoSleep that is holding a session.
+        if let directory = ProcessInfo.processInfo.environment["NOSLEEP_LID_PROBE"] {
+            // `NOSLEEP_LID_PROBE_ANGLES=24,18,10` holds those angles instead.
+            let angles = ProcessInfo.processInfo.environment["NOSLEEP_LID_PROBE_ANGLES"]?
+                .split(separator: ",").compactMap { Double($0) }
+            if let angles, !angles.isEmpty {
+                lidEffect.probe(to: URL(fileURLWithPath: directory), angles: angles)
+            } else {
+                lidEffect.probe(to: URL(fileURLWithPath: directory))
+            }
+            return
+        }
         #endif
 
         Backstop.install()
@@ -50,8 +64,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             NSApp.terminate(nil)
         }
         updater.start()
-        let statusPanel = StatusPanel(controller: controller, updater: updater)
+        let statusPanel = StatusPanel(controller: controller, updater: updater, lidEffect: lidEffect)
         self.statusPanel = statusPanel
+        controller.onAwake = { [lidEffect] in lidEffect.setAwake($0) }
+        lidEffect.setAwake(controller.isAwake)
         #if DEBUG
         if let directory = ProcessInfo.processInfo.environment["NOSLEEP_PANEL_PROBE"] {
             statusPanel.probe(to: URL(fileURLWithPath: directory))
@@ -73,6 +89,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// Leaves sleep, Low Power Mode and the mute as they are when an update
     /// relaunches the app: the new copy reads the same defaults and carries on.
     func applicationWillTerminate(_ notification: Notification) {
+        lidEffect.stop()
         guard !relaunching else { return }
         controller.restoreIfOwned()
     }

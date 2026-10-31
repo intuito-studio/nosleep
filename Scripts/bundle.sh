@@ -24,6 +24,8 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
 cp "$BIN_PATH/NoSleep" "$APP/Contents/MacOS/NoSleep"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
+# The MIT notice for the code ported from Mac Duo travels with the app.
+cp "$ROOT/THIRD-PARTY-NOTICES.md" "$APP/Contents/Resources/"
 
 # The Icon Composer bundle becomes Assets.car, which macOS 26 and later draws
 # as Liquid Glass, plus AppIcon.icns, a flat render for macOS 14 and 15.

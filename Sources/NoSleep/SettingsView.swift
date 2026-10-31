@@ -6,9 +6,13 @@ import SwiftUI
 /// panel, which is for switching on and off.
 struct SettingsView: View {
     let controller: Controller
+    let lidEffect: LidEffect
 
     var body: some View {
         Form {
+            if lidEffect.isAvailable {
+                LidSection(effect: lidEffect)
+            }
             ActivitySection(events: controller.log)
         }
         .formStyle(.grouped)
@@ -16,6 +20,39 @@ struct SettingsView: View {
     }
 
     static let size = NSSize(width: 460, height: 560)
+}
+
+/// The lid effect's one choice. The cat needs nothing; the fold needs
+/// Screen Recording, and this click is the only place that asks for it.
+private struct LidSection: View {
+    let effect: LidEffect
+
+    var body: some View {
+        Section {
+            Toggle("Fold the screen as the lid closes", isOn: Binding(
+                get: { effect.foldsScreen },
+                set: { effect.setFoldsScreen($0) }
+            ))
+            if effect.foldsScreen, !effect.hasScreenRecording {
+                HStack {
+                    Text("Needs Screen Recording. Until then, only the cat shows.")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Open Settings…") { effect.openScreenRecordingSettings() }
+                }
+            }
+        } header: {
+            Text("Lid")
+        } footer: {
+            Text("While NoSleep is on, the cat comes up as the lid closes. Folding holds the desktop still while the lid turns around it, and needs Screen Recording.")
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            effect.refreshPermission()
+        }
+    }
 }
 
 /// Every event kept, newest first, like a log read back in the morning.
@@ -64,10 +101,12 @@ private struct ActivitySection: View {
 @MainActor
 final class SettingsWindow {
     private let controller: Controller
+    private let lidEffect: LidEffect
     private var window: NSWindow?
 
-    init(controller: Controller) {
+    init(controller: Controller, lidEffect: LidEffect) {
         self.controller = controller
+        self.lidEffect = lidEffect
     }
 
     func show() {
@@ -86,7 +125,7 @@ final class SettingsWindow {
             contentRect: NSRect(origin: .zero, size: SettingsView.size),
             styleMask: [.titled, .closable], backing: .buffered, defer: false
         )
-        window.contentView = NSHostingView(rootView: SettingsView(controller: controller))
+        window.contentView = NSHostingView(rootView: SettingsView(controller: controller, lidEffect: lidEffect))
         window.title = "NoSleep Settings"
         window.isReleasedWhenClosed = false
         window.center()
