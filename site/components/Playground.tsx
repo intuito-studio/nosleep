@@ -296,12 +296,7 @@ function BatteryChart({ stop, timer, awake }: { stop: number; timer: number; awa
     const redraw = () => draw.current();
     const ro = new ResizeObserver(redraw);
     ro.observe(c);
-    const scheme = matchMedia("(prefers-color-scheme: dark)");
-    scheme.addEventListener("change", redraw);
-    return () => {
-      ro.disconnect();
-      scheme.removeEventListener("change", redraw);
-    };
+    return () => ro.disconnect();
   }, []);
 
   useGSAP(
