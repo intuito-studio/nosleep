@@ -5,14 +5,10 @@ import { DMG_URL, REPO_URL } from "./links";
 // metadata, the structured data, the FAQ on the page and llms.txt agree.
 
 /**
- * The page's own address. On Vercel the production domain is known at build
- * time; NEXT_PUBLIC_SITE_URL overrides it anywhere else.
+ * The page's own address, fixed so previews and builds anywhere point search
+ * engines at the real domain; NEXT_PUBLIC_SITE_URL overrides it.
  */
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3344");
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nosleep.intuito.dev";
 
 export const NAME = "NoSleep";
 export const TITLE = "NoSleep: keep your Mac awake with the lid closed";
@@ -20,7 +16,7 @@ export const DESCRIPTION =
   "Free macOS menu bar app that keeps a MacBook running with the lid closed, no external display needed. " +
   "Timer, battery stop and heat safety put sleep back on their own. macOS 14+, Apple silicon and Intel.";
 export const PUBLISHER = "Intuito Studio";
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";
 
 export const FAQ: [string, string][] = [
   [
