@@ -1,6 +1,5 @@
-/* NoSleep's page. Dark is the default because the subject is a Mac at night
-   with its lid shut; light follows the visitor's setting. The hero stays
-   dark either way: it is a scene, not a surface. */
+/* NoSleep's page. Dark only: the subject is a Mac at night with its lid
+   shut, and the page stays night whatever the visitor's setting. */
 
 :root {
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-inter), "Helvetica Neue", sans-serif;
@@ -37,31 +36,7 @@
   --nav: rgba(0, 0, 0, 0.66);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color-scheme: light;
-    --bg: #fbfbfd;
-    --surface: #ffffff;
-    --ink: #1d1d1f;
-    --ink-2: #5e5e63;
-    --ink-3: #6e6e73;
-    --hair: rgba(0, 0, 0, 0.1);
-    --code-bg: rgba(0, 0, 0, 0.05);
-    --accent: #c45c00;
-    --desk: #e9e9ee;
-    --menubar: rgba(255, 255, 255, 0.7);
-    --panel: #f2f2f5;
-    --tile: #ffffff;
-    --tile-edge: rgba(0, 0, 0, 0.06);
-    --tile-2: #e5e5ea;
-    --track: rgba(0, 0, 0, 0.1);
-    --tick: rgba(0, 0, 0, 0.18);
-    --thumb: #ffffff;
-    --nav: rgba(251, 251, 253, 0.74);
-  }
-}
-
-/* The hero is always night. */
+/* The hero and nav pin their own night tokens, as the bag band does. */
 .hero,
 .nav {
   color-scheme: dark;
@@ -264,11 +239,6 @@ html.refracts .panel.glass {
     translate 500ms var(--ease-out);
 }
 
-@media (prefers-color-scheme: light) {
-  .nav {
-    --glass-tint: rgba(18, 18, 22, 0.82);
-  }
-}
 
 /* Inside the hero's Mac, its menu bar is the only bar. */
 html[data-in-hero] .nav {
@@ -353,12 +323,6 @@ html[data-in-hero] .nav {
     inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
-@media (prefers-color-scheme: light) {
-  .install .glass-button {
-    background: rgba(0, 0, 0, 0.04);
-    box-shadow: inset 0 0 0 1px var(--hair);
-  }
-}
 
 .glass-button:disabled {
   cursor: not-allowed;
@@ -1066,14 +1030,67 @@ h2 {
   color: var(--ink-2);
 }
 
+/* ───────── Questions ───────── */
+
+.faq {
+  display: grid;
+  gap: 12px;
+  max-width: 760px;
+  margin: 40px auto 0;
+}
+
+.faq details {
+  border-radius: 22px;
+  padding: 0 22px;
+}
+
+.faq summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: "+";
+  flex: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--accent);
+  transition: rotate 300ms var(--ease-out);
+}
+
+.faq details[open] summary::after {
+  rotate: 45deg;
+}
+
+.faq h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+.faq p {
+  margin: 0 0 20px;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
 /* ───────── Code ───────── */
 
 .command pre {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   overflow-x: auto;
-  border-radius: 16px;
-  background: var(--surface);
-  border: 1px solid var(--hair);
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.85;
@@ -1129,28 +1146,28 @@ h2 {
   }
 }
 
+/* One row: the command, scrolling if it must, then the copy icon. */
 .command {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 8px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--hair);
 }
 
 .command pre {
-  padding: 12px 84px 12px 18px;
-}
-
-@media (max-width: 640px) {
-  .command pre {
-    padding: 48px 18px 12px;
-  }
+  padding: 12px 0 12px 18px;
 }
 
 .copy {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+  flex: none;
   display: grid;
-  min-width: 64px;
-  height: 30px;
-  padding: 0 12px;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: 1px solid var(--hair);
   border-radius: 999px;
   background: var(--bg);
@@ -1165,9 +1182,15 @@ h2 {
   transform: scale(0.96);
 }
 
-.copy-label {
+.copy-icon {
   grid-area: 1 / 1;
-  align-self: center;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   transition:
     opacity 200ms ease,
     filter 200ms ease;

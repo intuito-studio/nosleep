@@ -1,0 +1,20 @@
+# NoSleep
+
+> NoSleep is a free macOS menu bar app by Intuito Studio that keeps a MacBook running with the lid closed, with no external display, keyboard or power adapter. It switches macOS's own sleep setting (`pmset disablesleep`) and puts it back on its own.
+
+- Works on macOS 14 Sonoma or later, Apple silicon and Intel. Free; source on GitHub.
+- One click in the menu bar keeps the Mac awake: for good, for 15 minutes to 8 hours, or until the battery reaches a level you pick (20% by default).
+- Lid shut during a session: display off, audio muted, Low Power Mode on; all undone when the lid opens.
+- Safety: Low Power Mode below 40% battery and when hot; stops at the battery level you set or when critically hot; quitting puts sleep back; a backstop restores sleep within a minute after a crash or force quit. When a timer or the battery stop ends a session with the lid shut, the Mac sleeps straight away.
+- Asks for the administrator password once, to allow exactly the power commands it uses.
+- On MacBooks with a lid angle sensor, the NoSleep cat rises on screen as the lid closes, as a sign it is holding the Mac awake.
+
+## Install
+
+- Download: https://github.com/intuito-studio/nosleep/releases/latest/download/NoSleep.dmg
+- Homebrew: `brew tap intuito-studio/tap && brew trust --cask intuito-studio/tap/nosleep && brew install --cask intuito-studio/tap/nosleep`
+- One line: `curl -fsSL https://raw.githubusercontent.com/intuito-studio/nosleep/main/install.sh | bash`
+
+## Links
+
+- Source: https://github.com/intuito-studio/nosleep

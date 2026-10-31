@@ -5,6 +5,7 @@ import { Hero } from "@/components/Hero";
 import * as I from "@/components/Icons";
 import { Playground } from "@/components/Playground";
 import { BREW_LINES, DMG_URL, INSOMNIA_URL, INSTALL_LINE, REPO_URL } from "@/lib/links";
+import { FAQ, jsonLd } from "@/lib/site";
 
 const RULES: [() => React.JSX.Element, string, string][] = [
   [I.Moon, "Lid shut at the end", "Sleeps straight away."],
@@ -17,6 +18,11 @@ const RULES: [() => React.JSX.Element, string, string][] = [
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        // Static facts from lib/site.ts, serialised at build time.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd()).replace(/</g, "\\u003c") }}
+      />
       <header className="nav glass">
         <a href="#top" className="nav-brand" aria-label="NoSleep, back to top">
           <Cat awake className="nav-cat" />
@@ -123,6 +129,22 @@ export default function Home() {
                 </div>
               ))}
             </dl>
+          </div>
+        </section>
+
+        <section className="section" id="faq" aria-labelledby="faq-title">
+          <div className="section-head center">
+            <h2 id="faq-title">Questions.</h2>
+          </div>
+          <div className="faq">
+            {FAQ.map(([q, a]) => (
+              <details key={q} className="glass">
+                <summary>
+                  <h3>{q}</h3>
+                </summary>
+                <p>{a}</p>
+              </details>
+            ))}
           </div>
         </section>
 
