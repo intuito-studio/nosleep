@@ -1123,6 +1123,10 @@ h2 {
   align-items: start;
 }
 
+.method .fine {
+  margin-top: 10px;
+}
+
 .method h3 {
   display: flex;
   align-items: center;
