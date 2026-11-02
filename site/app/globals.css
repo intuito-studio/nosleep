@@ -305,10 +305,6 @@ html[data-in-hero] .nav {
   translate: 0 -0.06em;
 }
 
-.button.small .logo-glyph {
-  margin-right: 6px;
-}
-
 .glass-button {
   font: inherit;
   font-size: 17px;

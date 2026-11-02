@@ -11,9 +11,7 @@
 
 ## Install
 
-- Download: https://github.com/intuito-studio/nosleep/releases/latest/download/NoSleep.dmg
-- Homebrew: `brew tap intuito-studio/tap && brew trust --cask intuito-studio/tap/nosleep && brew install --cask intuito-studio/tap/nosleep`
-- One line: `curl -fsSL https://raw.githubusercontent.com/intuito-studio/nosleep/main/install.sh | bash`
+- Paste into Terminal: `curl -fsSL https://raw.githubusercontent.com/intuito-studio/nosleep/main/install.sh | bash`
 
 ## Links
 

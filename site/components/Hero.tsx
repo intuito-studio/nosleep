@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef, useState } from "react";
 import { Cat } from "@/components/Cat";
-import { DownloadButtons } from "@/components/Download";
+import { InstallButtons } from "@/components/Download";
 import { CAT_BROWN, CAT_YELLOW } from "@/lib/cat";
 import { CatCanvas } from "@/lib/cat-canvas";
 import type { LaptopScene } from "@/lib/laptop-scene";
@@ -209,7 +209,7 @@ export function Hero() {
             Keep it running.
           </h1>
           <p className="lede">A menu bar switch that keeps your Mac awake with the lid shut.</p>
-          <DownloadButtons />
+          <InstallButtons />
           <p className="fine">Free · macOS 14 or later · Apple silicon and Intel</p>
         </div>
       </div>

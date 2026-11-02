@@ -1,10 +1,9 @@
 import { Cat } from "@/components/Cat";
 import { Copy } from "@/components/Copy";
-import { AppleLogo, DownloadButtons } from "@/components/Download";
 import { Hero } from "@/components/Hero";
 import * as I from "@/components/Icons";
 import { Playground } from "@/components/Playground";
-import { BREW_LINES, DMG_URL, INSOMNIA_URL, INSTALL_LINE, REPO_URL } from "@/lib/links";
+import { INSOMNIA_URL, INSTALL_LINE, REPO_URL } from "@/lib/links";
 import { FAQ, jsonLd } from "@/lib/site";
 
 const RULES: [() => React.JSX.Element, string, string][] = [
@@ -29,11 +28,9 @@ export default function Home() {
           NoSleep
         </a>
         <nav aria-label="Page">
-          <a href="#install">Install</a>
           <a href={REPO_URL}>GitHub</a>
-          <a className="button primary small" href={DMG_URL}>
-            <AppleLogo />
-            Download
+          <a className="button primary small" href="#install">
+            Install
           </a>
         </nav>
       </header>
@@ -153,11 +150,6 @@ export default function Home() {
             <img src="/app-icon.png" alt="" width={112} height={112} className="app-icon" />
             <h2 id="install-title">Get NoSleep.</h2>
             <p className="lede">Free, for macOS 14 or later. Updates in one click.</p>
-            <DownloadButtons />
-            <p className="fine narrow">
-              Not notarised: on first launch, click <b>Open Anyway</b> in System Settings → Privacy &amp; Security.
-              The two lines below skip this.
-            </p>
           </div>
 
           <div className="methods">
@@ -166,14 +158,10 @@ export default function Home() {
                 <I.Terminal />
                 One line
               </h3>
-              <Copy lines={[INSTALL_LINE]} label="the install command" />
-            </div>
-            <div className="method">
-              <h3>
-                <I.Mug />
-                Homebrew
-              </h3>
-              <Copy lines={BREW_LINES} label="the Homebrew commands" />
+              <div>
+                <Copy lines={[INSTALL_LINE]} label="the install command" />
+                <p className="fine">Paste it into Terminal. It puts NoSleep in Applications and opens it.</p>
+              </div>
             </div>
           </div>
         </section>

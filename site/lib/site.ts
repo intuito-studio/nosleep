@@ -1,4 +1,4 @@
-import { DMG_URL, REPO_URL } from "./links";
+import { INSTALL_LINE, REPO_URL } from "./links";
 
 // What the page says about itself to search engines and AI answer engines:
 // one place for the name, the address and the plain facts, so the
@@ -41,7 +41,7 @@ export const FAQ: [string, string][] = [
   ],
   [
     "How do I install NoSleep?",
-    "Download NoSleep.dmg and drag it to Applications, or run brew install --cask intuito-studio/tap/nosleep after tapping intuito-studio/tap, or the one-line installer on the page.",
+    `Paste one line into Terminal: ${INSTALL_LINE}. It downloads the latest release, puts NoSleep in Applications and opens it.`,
   ],
 ];
 
@@ -57,7 +57,6 @@ export function jsonLd() {
       applicationCategory: "UtilitiesApplication",
       operatingSystem: "macOS 14 or later",
       softwareVersion: VERSION,
-      downloadUrl: DMG_URL,
       installUrl: `${SITE_URL}/#install`,
       codeRepository: REPO_URL,
       image: `${SITE_URL}/app-icon.png`,

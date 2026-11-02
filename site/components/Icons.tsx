@@ -82,11 +82,4 @@ export const Terminal = () => (
   </Icon>
 );
 
-export const Mug = () => (
-  <Icon>
-    <path d="M5 8h11v7a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" />
-    <path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3.5v2M12 3.5v2" />
-  </Icon>
-);
-
 
