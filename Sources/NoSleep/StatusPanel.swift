@@ -28,6 +28,7 @@ final class StatusPanel: NSObject {
             self?.close()
             self?.settings.show()
         })
+        panel.onCancel = { [weak self] in self?.close() }
         item.button?.target = self
         item.button?.action = #selector(toggle)
         item.button?.imagePosition = .imageLeading
@@ -53,8 +54,18 @@ final class StatusPanel: NSObject {
         panel.makeKeyAndOrderFront(nil)
         button.highlight(true)
         outsideClicks = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            MainActor.assumeIsolated { self?.close() }
+            MainActor.assumeIsolated {
+                // The menu bar can report a click on our own item as outside;
+                // closing here would let the item's action open the panel again.
+                guard let self, !self.pointerIsOnItem else { return }
+                self.close()
+            }
         }
+    }
+
+    private var pointerIsOnItem: Bool {
+        guard let button = item.button, let window = button.window else { return false }
+        return window.convertToScreen(button.convert(button.bounds, to: nil)).contains(NSEvent.mouseLocation)
     }
 
     func close() {
@@ -121,8 +132,12 @@ final class StatusPanel: NSObject {
         // Key, so Esc closes it and ⌘, and ⌘Q reach its buttons.
         override var canBecomeKey: Bool { true }
 
+        /// Esc goes through the same close as a click, so the item's highlight
+        /// and the outside-click monitor go with the panel.
+        var onCancel: (() -> Void)?
+
         override func cancelOperation(_ sender: Any?) {
-            orderOut(nil)
+            if let onCancel { onCancel() } else { orderOut(nil) }
         }
     }
 
