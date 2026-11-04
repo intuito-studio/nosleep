@@ -29,7 +29,7 @@ verify:
 verify-lid:
 	@./Scripts/verify.sh lid
 
-# Universal build → dist/NoSleep.dmg, and the cask in ../homebrew-tap updated to match.
+# Universal build → dist/NoSleep.dmg, the file a GitHub release carries.
 release:
 	@./Scripts/release.sh
 

@@ -10,33 +10,14 @@ good, for a set time, or until the battery reaches a level you pick.
 
 ## Install
 
-**Homebrew**
-
-```sh
-brew tap intuito-studio/tap
-brew trust --cask intuito-studio/tap/nosleep
-brew install --cask intuito-studio/tap/nosleep
-```
-
-**One line, no Homebrew**
+Paste this into Terminal:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/intuito-studio/nosleep/main/install.sh | bash
 ```
 
-**Download**: get `NoSleep.dmg` from
-[Releases](https://github.com/intuito-studio/nosleep/releases/latest) and drag
-NoSleep onto Applications. The first time you open it, macOS refuses because the
-app isn't notarised. Go to **System Settings → Privacy & Security**, scroll down
-to *"NoSleep" was blocked*, and click **Open Anyway**. Or clear the flag yourself:
-
-```sh
-xattr -dr com.apple.quarantine /Applications/NoSleep.app
-```
-
-Homebrew and the one-liner don't need this step. NoSleep is signed ad hoc, not
-with a paid Apple Developer ID. Homebrew's cask clears the quarantine flag after
-installing, and `curl` never sets it.
+It downloads the latest release, puts NoSleep in Applications and opens it.
+Running it again reinstalls the latest version.
 
 Needs macOS 14 or later, on Apple silicon or Intel.
 
@@ -105,7 +86,8 @@ and opened, what changed, and why a session ended.
 
 NoSleep checks for a new release once a day. When there is one, a notification
 and the panel both offer **Update**: one click, and it restarts on the new
-version a few seconds later, still keeping the Mac awake if it was.
+version a few seconds later, still keeping the Mac awake if it was. To look
+now, open **Settings…** and click **Check for Updates**.
 
 Quitting NoSleep switches sleep back on if NoSleep was the one holding it off.
 
@@ -143,11 +125,7 @@ commands stop asking for a password in the terminal too.
 
 ## Uninstall
 
-```sh
-brew uninstall --zap --cask nosleep
-```
-
-Without Homebrew, quit NoSleep, then:
+Quit NoSleep, then:
 
 ```sh
 launchctl bootout gui/$(id -u)/dev.intuito.nosleep.backstop
@@ -164,9 +142,10 @@ Needs Xcode (for `actool`, which compiles the icon), not just the Command Line T
 ```sh
 make run       # debug build → .build/NoSleep.app → relaunch it
 make test
-make release   # universal dist/NoSleep.dmg, and ../homebrew-tap/Casks/nosleep.rb updated
+make release   # universal build → dist/NoSleep.dmg
 ```
 
 To ship a version: bump `VERSION`, run `make release`, and follow the steps it
-prints. You tag and push, attach `dist/NoSleep.dmg` to a GitHub release, then
-push the tap.
+prints. You tag and push, then attach `dist/NoSleep.dmg` to a GitHub release.
+Both the install line and the in-app updater download that file, so keep its
+name.

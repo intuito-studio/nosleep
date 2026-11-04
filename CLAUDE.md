@@ -11,7 +11,7 @@ make run       # debug build → .build/NoSleep.app → relaunch it
 make test      # swift test
 make verify    # debug app against the real system: sudo rule, timer, quit, crash backstop, energy
 make verify-lid  # the lid test: close the lid when it asks
-make release   # universal build → dist/NoSleep.dmg, cask in ../homebrew-tap updated
+make release   # universal build → dist/NoSleep.dmg
 ```
 
 `NOSLEEP_SNAPSHOT_DIR=/tmp/nosleep .build/NoSleep.app/Contents/MacOS/NoSleep`
@@ -45,9 +45,9 @@ install.sh            the curl | bash installer, served from main
 site/                 the home page: Next.js static export (`cd site && npm run dev`)
 ```
 
-The Homebrew cask lives in a separate repo, `../homebrew-tap`
-(`intuito-studio/homebrew-tap`), so the install line is
-`brew install --cask intuito-studio/tap/nosleep`.
+The one way in is `install.sh` (the curl line on the site and in the README).
+Homebrew and a DMG download aren't offered for now; `../homebrew-tap` still
+exists but release.sh no longer touches it.
 
 ## Things that are easy to break
 
@@ -71,9 +71,8 @@ password once more. A rule that fails to parse breaks sudo for the whole Mac,
 which is why it goes through `visudo -c` before it is installed.
 
 **Distribution is unsigned by design.** No Developer ID, so no notarisation.
-Builds are always signed ad hoc. The cask strips quarantine in
-`postflight_steps`, which is the Homebrew 7 form; plain `postflight` is
-deprecated there.
+Builds are always signed ad hoc. `install.sh` downloads with curl, which sets
+no quarantine flag, so Gatekeeper never stops the app it installs.
 
 **Corners are concentric.** MenuBarExtra's window has a ~7 pt corner drawn
 by the window server, far too tight around 18 pt tiles, so the app doesn't use
@@ -98,7 +97,8 @@ hotspot feature was removed.
 
 **Updates are one click.** `Updater` reads the latest GitHub release once a
 day, and its `NoSleep.dmg` asset is what gets installed: keep that asset name
-and the `v<version>` tag. Update (in the panel, or the notification) downloads
+and the `v<version>` tag. Settings has Check for Updates for anyone who won't wait the day. Update
+(in the panel, the notification or Settings) downloads
 it, swaps the bundle in place and relaunches, without undoing the session; the
 new copy carries it on from the defaults. Debug builds only check when
 `NOSLEEP_UPDATE_FEED` names a feed (a file:// JSON shaped like GitHub's works),
