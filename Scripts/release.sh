@@ -38,5 +38,5 @@ To publish:
   1. git tag v$VERSION && git push origin main v$VERSION
   2. On github.com, draft a release from tag v$VERSION, attach dist/NoSleep.dmg
      (keep the file name NoSleep.dmg) and publish it. Installed copies see it
-     within a day, or at once from Settings → Check for Updates.
+     within a day.
 EOF

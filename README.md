@@ -86,8 +86,7 @@ and opened, what changed, and why a session ended.
 
 NoSleep checks for a new release once a day. When there is one, a notification
 and the panel both offer **Update**: one click, and it restarts on the new
-version a few seconds later, still keeping the Mac awake if it was. To look
-now, open **Settings…** and click **Check for Updates**.
+version a few seconds later, still keeping the Mac awake if it was.
 
 Quitting NoSleep switches sleep back on if NoSleep was the one holding it off.
 

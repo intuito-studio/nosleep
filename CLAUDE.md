@@ -97,8 +97,8 @@ hotspot feature was removed.
 
 **Updates are one click.** `Updater` reads the latest GitHub release once a
 day, and its `NoSleep.dmg` asset is what gets installed: keep that asset name
-and the `v<version>` tag. Settings has Check for Updates for anyone who won't wait the day. Update
-(in the panel, the notification or Settings) downloads
+and the `v<version>` tag. Update
+(in the panel, or the notification) downloads
 it, swaps the bundle in place and relaunches, without undoing the session; the
 new copy carries it on from the defaults. Debug builds only check when
 `NOSLEEP_UPDATE_FEED` names a feed (a file:// JSON shaped like GitHub's works),
