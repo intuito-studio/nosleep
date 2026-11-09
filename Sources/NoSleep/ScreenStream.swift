@@ -71,8 +71,10 @@ final class ScreenStream {
 
     func start(display id: CGDirectDisplayID) {
         // Asked every display frame while a picture is wanted; a start that
-        // failed waits a moment rather than asking ScreenCaptureKit again at once.
-        guard !isRunning, CACurrentMediaTime() - lastFailure > 2, CGPreflightScreenCaptureAccess() else { return }
+        // failed waits a moment rather than asking ScreenCaptureKit again at
+        // once. Only a moment: the usual failure is the overlay not yet listed
+        // as on screen, and the lid is still coming down.
+        guard !isRunning, CACurrentMediaTime() - lastFailure > 0.3, CGPreflightScreenCaptureAccess() else { return }
         isRunning = true
         generation += 1
         let token = generation

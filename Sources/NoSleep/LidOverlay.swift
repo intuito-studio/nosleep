@@ -103,19 +103,19 @@ final class LidOverlay {
         floodDrawn = nil
     }
 
-    /// Where the cat would look, with the lid at `angle`, for the pointer at
+    /// Where the cat would look, `rise` of the way up, for the pointer at
     /// `location` in global screen coordinates (y up).
-    func look(at location: CGPoint, angle: Double) -> CatLook {
+    func look(at location: CGPoint, rise: Double) -> CatLook {
         let frame = window.frame
         let point = CGPoint(x: location.x - frame.minX, y: frame.maxY - location.y)
-        return cat.layout.look(at: point, rise: LidCurves.catRise(at: angle))
+        return cat.layout.look(at: point, rise: rise)
     }
 
-    /// One frame with the lid at `angle`. `folding` is false while there is
-    /// no picture to fold, or no permission to take one. Values are only set
-    /// when they change: each set redraws whatever reads it.
-    func draw(angle: Double, folding: Bool, look: CatLook) {
-        let rise = LidCurves.catRise(at: angle)
+    /// One frame with the lid at `angle`, the cat `rise` of the way up and
+    /// the picture folded as far as `foldAngle`. `folding` is false while
+    /// there is no picture to fold, or no permission to take one. Values are
+    /// only set when they change: each set redraws whatever reads it.
+    func draw(angle: Double, rise: Double, foldAngle: Double, folding: Bool, look: CatLook) {
         if cat.rise != rise { cat.rise = rise }
         // The cat sits low on the glass, so it goes dark late, with its bottom.
         let light = LidCurves.lightLeft(darkness: LidCurves.darkness(at: angle), height: 0.25)
@@ -125,7 +125,7 @@ final class LidOverlay {
         let showFold = folding && LidCurves.isFolding(at: angle)
         if showFold, let renderer, renderer.hasPicture {
             foldView.isHidden = false
-            renderer.render(angle: angle, size: window.frame.size, scale: window.backingScaleFactor)
+            renderer.render(angle: foldAngle, size: window.frame.size, scale: window.backingScaleFactor)
         } else {
             foldView.isHidden = true
         }

@@ -190,6 +190,15 @@ struct DampedSpringTests {
         #expect(spring.isSettled(at: 60, tolerance: 0.05))
     }
 
+    @Test("However fast the lid shuts, the cat takes a moment to come up rather than appearing at once")
+    func riseTakesAMoment() {
+        var rise = DampedSpring(value: 0, frequency: LidCurves.riseFrequency)
+        for _ in 0..<6 { rise.advance(toward: LidCurves.catRise(at: 40), dt: 1.0 / 60) }
+        #expect(rise.value < 1.0 / 3)
+        for _ in 0..<30 { rise.advance(toward: LidCurves.catRise(at: 40), dt: 1.0 / 60) }
+        #expect(rise.value > 0.9)
+    }
+
     @Test("The spring is mostly there within a sensor refresh or three")
     func quick() {
         var spring = DampedSpring(value: 100, frequency: 14)

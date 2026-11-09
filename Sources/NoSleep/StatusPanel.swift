@@ -22,7 +22,7 @@ final class StatusPanel: NSObject {
 
     init(controller: Controller, updater: Updater, lidEffect: LidEffect) {
         self.controller = controller
-        settings = SettingsWindow(controller: controller, lidEffect: lidEffect)
+        settings = SettingsWindow(controller: controller, lidEffect: lidEffect, updater: updater)
         super.init()
         panel.show(PanelView(controller: controller, updater: updater) { [weak self] in
             self?.close()

@@ -16,7 +16,7 @@ export const DESCRIPTION =
   "Free macOS menu bar app that keeps a MacBook running with the lid closed, no external display needed. " +
   "Timer, battery stop and heat safety put sleep back on their own. macOS 14+, Apple silicon and Intel.";
 export const PUBLISHER = "Intuito Studio";
-export const VERSION = "1.1.0";
+export const VERSION = "1.1.1";
 
 export const FAQ: [string, string][] = [
   [

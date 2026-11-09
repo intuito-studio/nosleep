@@ -7,12 +7,14 @@ import SwiftUI
 struct SettingsView: View {
     let controller: Controller
     let lidEffect: LidEffect
+    let updater: Updater
 
     var body: some View {
         Form {
             if lidEffect.isAvailable {
                 LidSection(effect: lidEffect)
             }
+            UpdatesSection(updater: updater)
             ActivitySection(events: controller.log)
         }
         .formStyle(.grouped)
@@ -51,6 +53,61 @@ private struct LidSection: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             effect.refreshPermission()
+        }
+    }
+}
+
+/// The version, and a way to look for a newer one now rather than wait for
+/// the daily check. Installing is the same one click as in the panel.
+private struct UpdatesSection: View {
+    let updater: Updater
+
+    var body: some View {
+        Section("Updates") {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("NoSleep \(Updater.currentVersion)")
+                    Text(status)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
+                action
+            }
+        }
+    }
+
+    private var status: String {
+        switch updater.state {
+        case .available(let version, _): return "\(version) is ready to install."
+        case .installing(let version): return "Updating to \(version)…"
+        case .failed(let message): return "Update didn't install: \(message)"
+        case .upToDate:
+            if updater.isChecking { return "Checking…" }
+            switch updater.lastResult {
+            case .upToDate(let at): return "Up to date. Checked \(at.formatted(.relative(presentation: .named)))."
+            case .unreachable: return "Couldn't reach GitHub. Check your connection and try again."
+            case nil: return updater.canCheck ? "Checks once a day." : "This build doesn't check for updates."
+            }
+        }
+    }
+
+    @ViewBuilder private var action: some View {
+        switch updater.state {
+        case .available:
+            Button("Update") { updater.install() }
+        case .installing:
+            ProgressView().controlSize(.small)
+        case .failed:
+            Button("Retry") { updater.retry() }
+        case .upToDate:
+            if updater.isChecking {
+                ProgressView().controlSize(.small)
+            } else {
+                Button("Check for Updates") { updater.check(announcing: false) }
+                    .disabled(!updater.canCheck)
+            }
         }
     }
 }
@@ -102,11 +159,13 @@ private struct ActivitySection: View {
 final class SettingsWindow {
     private let controller: Controller
     private let lidEffect: LidEffect
+    private let updater: Updater
     private var window: NSWindow?
 
-    init(controller: Controller, lidEffect: LidEffect) {
+    init(controller: Controller, lidEffect: LidEffect, updater: Updater) {
         self.controller = controller
         self.lidEffect = lidEffect
+        self.updater = updater
     }
 
     func show() {
@@ -125,7 +184,7 @@ final class SettingsWindow {
             contentRect: NSRect(origin: .zero, size: SettingsView.size),
             styleMask: [.titled, .closable], backing: .buffered, defer: false
         )
-        window.contentView = NSHostingView(rootView: SettingsView(controller: controller, lidEffect: lidEffect))
+        window.contentView = NSHostingView(rootView: SettingsView(controller: controller, lidEffect: lidEffect, updater: updater))
         window.title = "NoSleep Settings"
         window.isReleasedWhenClosed = false
         window.center()

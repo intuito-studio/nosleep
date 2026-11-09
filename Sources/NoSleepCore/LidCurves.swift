@@ -19,6 +19,12 @@ public enum LidCurves {
 
     public static func isShown(at angle: Double) -> Bool { angle < showBelow }
 
+    /// How quickly the shown cat follows `catRise`, in radians per second. A
+    /// lid shut in a flick crosses 98° to 84° between two sensor readings;
+    /// slower than the hinge's spring, the cat still takes about half a
+    /// second to come up instead of appearing at once.
+    public static let riseFrequency = 8.0
+
     /// 0 hidden below the bezel, 1 up. Overshoots a little on the way, so the
     /// cat lands rather than stops.
     public static func catRise(at angle: Double) -> Double {

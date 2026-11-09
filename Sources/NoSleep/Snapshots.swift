@@ -39,8 +39,9 @@ enum Snapshots {
         }
         let settings = Controller.preview(awake: true).withLog(night)
         let lidEffect = LidEffect(defaults: UserDefaults(suiteName: "nosleep.preview")!)
+        let checked = Updater.preview(.upToDate, lastResult: .upToDate(Date().addingTimeInterval(-2 * 3600)))
         for dark in [false, true] {
-            write(SettingsView(controller: settings, lidEffect: lidEffect), dark: dark, in: window,
+            write(SettingsView(controller: settings, lidEffect: lidEffect, updater: checked), dark: dark, in: window,
                   to: directory.appendingPathComponent("settings-\(dark ? "dark" : "light").png"))
         }
         window.orderOut(nil)

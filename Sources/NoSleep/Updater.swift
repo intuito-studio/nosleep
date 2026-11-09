@@ -23,7 +23,18 @@ final class Updater {
     private static let announcedKey = "announcedUpdate"
     private static let checkEvery: TimeInterval = 24 * 3600
 
+    /// What the last finished check found, for Settings. The panel only
+    /// shows an update, never "up to date".
+    enum CheckResult: Equatable {
+        case upToDate(Date)
+        case unreachable
+    }
+
     private(set) var state: State = .upToDate
+    private(set) var isChecking = false
+    private(set) var lastResult: CheckResult?
+    /// Debug builds have no feed unless `NOSLEEP_UPDATE_FEED` names one.
+    var canCheck: Bool { feed != nil }
     /// Quits this copy without undoing its session; set by the app delegate.
     var quitForRelaunch: () -> Void = { NSApp.terminate(nil) }
 
@@ -60,13 +71,20 @@ final class Updater {
         self.timer = timer
     }
 
-    func check() {
-        guard let feed, case .upToDate = state else { return }
+    /// `announcing` is off for the Settings button: the answer shows right
+    /// where the click was, so a notification would only repeat it.
+    func check(announcing: Bool = true) {
+        guard let feed, !isChecking, case .upToDate = state else { return }
+        isChecking = true
         Task {
-            // Offline, rate-limited, no release yet: all the same, try tomorrow.
+            defer { isChecking = false }
+            // Offline or rate-limited: try again tomorrow, or on the next click.
             guard let (data, _) = try? await URLSession.shared.data(from: feed),
-                  let release = try? JSONDecoder().decode(Release.self, from: data),
-                  let dmg = release.assets.first(where: { $0.name == "NoSleep.dmg" })?.browser_download_url
+                  let release = try? JSONDecoder().decode(Release.self, from: data)
+            else { lastResult = .unreachable; return }
+            lastResult = .upToDate(Date())
+            // A release still missing its DMG isn't one yet.
+            guard let dmg = release.assets.first(where: { $0.name == "NoSleep.dmg" })?.browser_download_url
             else { return }
             let version = release.tag_name.hasPrefix("v") ? String(release.tag_name.dropFirst()) : release.tag_name
             guard Version.isNewer(version, than: Self.currentVersion) else { return }
@@ -75,7 +93,7 @@ final class Updater {
             // For testing the whole path without a click.
             if ProcessInfo.processInfo.environment["NOSLEEP_INSTALL_UPDATE"] != nil { return install() }
             #endif
-            announce(version)
+            if announcing { announce(version) }
         }
     }
 
@@ -199,9 +217,10 @@ final class Updater {
 
     #if DEBUG
     /// An updater in a given state, for rendering the panel to an image.
-    static func preview(_ state: State) -> Updater {
+    static func preview(_ state: State, lastResult: CheckResult? = nil) -> Updater {
         let updater = Updater()
         updater.state = state
+        updater.lastResult = lastResult
         return updater
     }
     #endif

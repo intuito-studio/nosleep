@@ -8,8 +8,8 @@ import QuartzCore
 /// While NoSleep is on, follows the hinge as the lid comes down: the cat
 /// comes up from below the screen, its eyes on the pointer, and, with the fold
 /// switched on and Screen Recording granted, the desktop folds away under it
-/// as Mac Duo does it. Above 100°, or with NoSleep off, there is nothing: no window,
-/// no capture, the sensor read twice a second at most.
+/// as Mac Duo does it. Above 100° there is no window and no capture, only the
+/// sensor read ten times a second; with NoSleep off, not even that.
 @MainActor @Observable
 final class LidEffect {
     /// False on a Mac without a lid angle sensor; the feature is then absent.
@@ -29,6 +29,14 @@ final class LidEffect {
     @ObservationIgnored private var pollInterval: TimeInterval = 0
     @ObservationIgnored private var target = 120.0
     @ObservationIgnored private var spring = DampedSpring(value: 120, frequency: 14)
+    /// The reading before this one: nil until the first.
+    @ObservationIgnored private var lastReading: Double?
+    /// How far up the cat is drawn, following the angle's rise at its own pace.
+    @ObservationIgnored private var rise = DampedSpring(value: 0, frequency: LidCurves.riseFrequency)
+    /// The angle the fold is drawn at. Held at the fold's start, where it is
+    /// the screen itself, until a picture arrives; then it catches up with
+    /// the hinge, so a picture that comes late folds in rather than jumps.
+    @ObservationIgnored private var foldAngle = DampedSpring(value: LidCurves.fold.startAngle, frequency: 14)
     /// Where the pointer was at the last reading, global coordinates; nil
     /// while the eyes rest ahead.
     @ObservationIgnored private var pointer: CGPoint?
@@ -82,6 +90,7 @@ final class LidEffect {
     /// On quit, and whenever NoSleep turns off: window out, capture stopped.
     func stop() {
         awake = false
+        lastReading = nil
         poll?.invalidate()
         poll = nil
         pollInterval = 0
@@ -128,16 +137,25 @@ final class LidEffect {
         poll = timer
     }
 
-    /// The sensor refreshes about ten times a second. Read at that rate only
-    /// while the lid is low enough to matter; in normal use and shut, twice a second.
+    /// The sensor refreshes about ten times a second, and the lid is read at
+    /// that rate whenever it is open: read twice a second, a lid shut in a
+    /// flick went from normal use to nearly closed between two readings, and
+    /// the cat appeared already up. Shut, twice a second is plenty.
     private func read() {
         guard awake, let angle = readAngle() else { return }
+        let previous = lastReading
+        lastReading = angle
         target = angle
-        schedulePoll(every: angle > LidCurves.darkAt && angle < 105 ? 0.1 : 0.5)
+        schedulePoll(every: angle > LidCurves.darkAt ? 0.1 : 0.5)
 
         if overlay == nil {
             guard LidCurves.isShown(at: angle), let screen = NSScreen.builtIn else { return }
-            spring.snap(to: angle)
+            // Coming down from normal use, start where the overlay begins, so
+            // the cat rises and the fold starts on screen however far the lid
+            // went since the last reading.
+            let fromAbove = previous.map { !LidCurves.isShown(at: $0) } ?? false
+            spring.snap(to: fromAbove ? LidCurves.showBelow : angle)
+            rise.snap(to: LidCurves.catRise(at: spring.value))
             present(on: screen)
         }
         pointer = tracksPointer(at: angle) ? pointerLocation() : nil
@@ -210,7 +228,8 @@ final class LidEffect {
         lastFrame = now
         spring.advance(toward: target, dt: dt)
         let angle = spring.value
-        let gaze = pointer.map { overlay.look(at: $0, angle: angle) } ?? .ahead
+        rise.advance(toward: LidCurves.catRise(at: angle), dt: dt)
+        let gaze = pointer.map { overlay.look(at: $0, rise: rise.value) } ?? .ahead
         lookX.advance(toward: gaze.x, dt: dt)
         lookY.advance(toward: gaze.y, dt: dt)
 
@@ -220,12 +239,20 @@ final class LidEffect {
         }
         let folding = folds
         if folding { keepPicture(for: angle, in: overlay) } else { stream?.stop() }
-        overlay.draw(angle: angle, folding: folding, look: CatLook(x: lookX.value, y: lookY.value))
+        if overlay.hasPicture {
+            foldAngle.advance(toward: angle, dt: dt)
+        } else {
+            foldAngle.snap(to: max(angle, LidCurves.fold.startAngle))
+        }
+        overlay.draw(angle: angle, rise: rise.value, foldAngle: foldAngle.value, folding: folding,
+                     look: CatLook(x: lookX.value, y: lookY.value))
         // Still, nothing to draw until the next reading, unless a frame to
         // freeze is on its way. Shut, the screen is black and wants nothing.
         let awaitingPicture = folding && LidCurves.isFolding(at: angle) && angle > LidCurves.darkAt && !overlay.hasPicture
         let eyesStill = lookX.isSettled(at: gaze.x, tolerance: 0.005) && lookY.isSettled(at: gaze.y, tolerance: 0.005)
-        if spring.isSettled(at: target, tolerance: 0.02), eyesStill, !awaitingPicture {
+        let drawn = rise.isSettled(at: LidCurves.catRise(at: angle), tolerance: 0.001)
+            && foldAngle.isSettled(at: overlay.hasPicture ? angle : foldAngle.value, tolerance: 0.02)
+        if spring.isSettled(at: target, tolerance: 0.02), drawn, eyesStill, !awaitingPicture {
             displayLink?.isPaused = true
         }
     }
