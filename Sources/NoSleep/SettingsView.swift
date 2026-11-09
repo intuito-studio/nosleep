@@ -13,6 +13,8 @@ struct SettingsView: View {
         Form {
             if lidEffect.isAvailable {
                 LidSection(effect: lidEffect)
+            } else {
+                NoLidSensorSection()
             }
             UpdatesSection(updater: updater)
             ActivitySection(events: controller.log)
@@ -108,6 +110,19 @@ private struct UpdatesSection: View {
                 Button("Check for Updates") { updater.check(announcing: false) }
                     .disabled(!updater.canCheck)
             }
+        }
+    }
+}
+
+/// Said rather than hidden, so a Mac without the cat doesn't look broken.
+/// The M1 MacBook Air and the M1/M2 MacBook Pro with Touch Bar report no
+/// lid angle that can be read; keeping the Mac awake doesn't need one.
+private struct NoLidSensorSection: View {
+    var body: some View {
+        Section("Lid") {
+            Text("This Mac doesn't report its lid angle, so the cat and the fold don't show as the lid closes. Keeping it awake with the lid shut works as usual.")
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

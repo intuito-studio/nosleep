@@ -36,6 +36,10 @@ Click the cat in the menu bar. It sleeps curled up when the Mac sleeps normally,
   dragging it all the way left turns it off.
 - **Open at login** keeps it in the menu bar after a restart.
 
+When you open the lid, the panel says whether the Mac stayed awake the whole
+time: "Stayed awake 42m with the lid shut", or when it slept and why. After two
+minutes or more shut, a notification says it too.
+
 When a timer or the battery stop ends a session while the lid is shut, NoSleep
 puts the Mac to sleep straight away, so it isn't left running in a bag.
 
@@ -50,7 +54,7 @@ external mic.
 
 ### Closing the lid
 
-On a MacBook with a lid angle sensor, the cat comes up from below the screen
+On a MacBook whose lid angle can be read, the cat comes up from below the screen
 in Liquid Glass as the lid passes upright during a session, its paws over the
 bottom edge and its lit eyes following the pointer: a sign NoSleep is holding
 on. **Fold the screen as the lid closes**,
@@ -58,6 +62,9 @@ in Settings, adds Mac Duo's fold: the desktop holds still while the lid turns
 around it, frosting and darkening from the top. The fold needs Screen
 Recording, asked for when you switch it on. Nothing shows with NoSleep off or
 with the lid open as usual.
+
+The M1 MacBook Air and the M1/M2 MacBook Pro with Touch Bar don't report their
+lid angle, so they get no cat or fold. Everything else works the same.
 
 ### Safety rules
 

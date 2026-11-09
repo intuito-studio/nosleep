@@ -157,3 +157,63 @@ struct VersionTests {
         #expect(!Version.isNewer("v1.2", than: "1.2.0"))
     }
 }
+
+@Suite("Whether the Mac stayed awake with the lid shut")
+struct LidWatchTests {
+    let shut = Date(timeIntervalSince1970: 1_000_000)
+
+    @Test("A lid shut through a whole session reports awake for all of it")
+    func stayedAwake() throws {
+        var watch = LidWatch()
+        watch.lidClosed(at: shut)
+        let opened = watch.lidOpened(at: shut.addingTimeInterval(42 * 60))
+        let report = try #require(opened)
+        #expect(report.stayedAwake)
+        #expect(report.awake == 42 * 60)
+    }
+
+    @Test("A sleep with the lid shut is reported with when it came, even with no stop to explain it")
+    func sleptUnexpectedly() throws {
+        var watch = LidWatch()
+        watch.lidClosed(at: shut)
+        watch.willSleep(at: shut.addingTimeInterval(120))
+        watch.willSleep(at: shut.addingTimeInterval(900))
+        let opened = watch.lidOpened(at: shut.addingTimeInterval(3600))
+        let report = try #require(opened)
+        #expect(!report.stayedAwake)
+        #expect(report.awake == 120)
+        #expect(report.stop == nil)
+    }
+
+    @Test("A sleep that follows NoSleep's own stop carries the stop's reason")
+    func sleptAfterStop() throws {
+        var watch = LidWatch()
+        watch.lidClosed(at: shut)
+        watch.stopped(.timer, at: shut.addingTimeInterval(1800))
+        watch.willSleep(at: shut.addingTimeInterval(1801))
+        let opened = watch.lidOpened(at: shut.addingTimeInterval(7200))
+        let report = try #require(opened)
+        #expect(report.stop == .timer)
+        #expect(report.awake == 1801)
+    }
+
+    @Test("Sleep with no lid being watched, as with NoSleep off, reports nothing")
+    func notWatching() {
+        var watch = LidWatch()
+        watch.willSleep(at: shut)
+        let opened = watch.lidOpened(at: shut.addingTimeInterval(60))
+        #expect(opened == nil)
+    }
+
+    @Test("Each lid close starts fresh: a sleep last time doesn't stain the next report")
+    func freshEachTime() throws {
+        var watch = LidWatch()
+        watch.lidClosed(at: shut)
+        watch.willSleep(at: shut.addingTimeInterval(10))
+        _ = watch.lidOpened(at: shut.addingTimeInterval(60))
+        watch.lidClosed(at: shut.addingTimeInterval(100))
+        let opened = watch.lidOpened(at: shut.addingTimeInterval(200))
+        let report = try #require(opened)
+        #expect(report.stayedAwake)
+    }
+}

@@ -104,6 +104,13 @@ new copy carries it on from the defaults. Debug builds only check when
 `NOSLEEP_UPDATE_FEED` names a feed (a file:// JSON shaped like GitHub's works),
 and `NOSLEEP_INSTALL_UPDATE=1` installs without the click.
 
+**A closed lid gets an answer when it opens.** `LidWatch` (NoSleepCore)
+watches a lid shut during a session and takes sleep from
+`NSWorkspace.willSleepNotification`, never from a gap in the ticks or a dark
+screen. On opening, the panel shows it for 12 hours ("Stayed awake 42m with the
+lid shut", or when it slept and why), the Activity log keeps it, and a lid
+shut for two minutes or more gets a notification unless a stop already sent one.
+
 **The lid overlay never gets in the way.** `LidEffect` reads the hinge
 (`LidAngleSensor`, ~10 Hz, smoothed by `DampedSpring`) only while NoSleep is
 on, and `LidOverlay` is a borderless window at the shielding level that

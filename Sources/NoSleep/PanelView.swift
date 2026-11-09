@@ -10,10 +10,17 @@ struct PanelView: View {
     var updater: Updater?
     var openSettings: () -> Void = {}
 
+    /// The sheet's corner, for the window's outline and shadow.
+    static let sheetRadius = GlassTile.sheetRadius
+
     var body: some View {
         GlassGroup {
             VStack(spacing: 10) {
                 AwakeTile(controller: controller)
+
+                if let report = controller.lastLid, controller.now.timeIntervalSince(report.openedAt) < 12 * 3600 {
+                    LidReportLine(report: report)
+                }
 
                 if let problem = controller.problem {
                     Label(problem, systemImage: "exclamationmark.triangle.fill")
@@ -136,6 +143,43 @@ private struct AwakeTile: View {
             return "Click to stay awake. Asks for your password once."
         }
         return "Sleeps when the lid closes"
+    }
+}
+
+/// The answer to "did it really stay awake?", from the last time the lid was
+/// shut during a session. Kept for half a day, then the morning is over.
+private struct LidReportLine: View {
+    let report: LidWatch.Report
+
+    var body: some View {
+        // Colour on the symbol only: green text on glass is hard to read.
+        Label {
+            Text(text).foregroundStyle(report.stayedAwake || report.stop != nil ? .secondary : .primary)
+        } icon: {
+            Image(systemName: symbol).foregroundStyle(colour)
+        }
+            .font(.system(size: 11.5))
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 6)
+    }
+
+    private var awake: String { Format.remaining(report.awake) }
+
+    private var text: String {
+        if report.stayedAwake { return "Stayed awake \(awake) with the lid shut" }
+        if let stop = report.stop { return "Ran \(awake) with the lid shut, then slept: \(Controller.describe(stop))" }
+        return "Slept \(awake) after the lid shut"
+    }
+
+    private var symbol: String {
+        if report.stayedAwake { return "checkmark.circle.fill" }
+        return report.stop == nil ? "exclamationmark.triangle.fill" : "moon.zzz.fill"
+    }
+
+    private var colour: Color {
+        if report.stayedAwake { return .green }
+        return report.stop == nil ? .orange : .secondary
     }
 }
 

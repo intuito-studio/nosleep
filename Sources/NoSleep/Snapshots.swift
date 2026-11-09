@@ -28,6 +28,14 @@ enum Snapshots {
                 awake: true, duration: 8 * 3600, elapsed: 4 * 3600
             ).withLog(night)),
             ("update", .preview(awake: false, ruleIsCurrent: false)),
+            ("lid-awake", .preview(awake: true, lastLid: LidWatch.Report(
+                closedAt: Date().addingTimeInterval(-3 * 3600), openedAt: Date().addingTimeInterval(-60),
+                sleptAt: nil, stop: nil
+            ))),
+            ("lid-slept", .preview(awake: false, lastLid: LidWatch.Report(
+                closedAt: Date().addingTimeInterval(-3 * 3600), openedAt: Date().addingTimeInterval(-60),
+                sleptAt: Date().addingTimeInterval(-3 * 3600 + 120), stop: nil
+            ))),
         ]
         let update = Updater.preview(.available(version: "1.1.0", dmg: URL(string: "https://example.com")!))
         let window = SnapshotWindow()

@@ -27,6 +27,9 @@ final class Controller {
     private(set) var lastStop: (at: Date, reason: Limits.StopReason)?
     private(set) var problem: String?
     private(set) var log: [SessionEvent] = []
+    /// What happened the last time the lid was shut during a session, kept
+    /// for the panel: a closed laptop can't show whether it stayed awake.
+    private(set) var lastLid: LidWatch.Report?
 
     /// Set when this app switched sleep off, cleared when it switches it back.
     /// Only a session we own is restored on quit or by the backstop; one started
@@ -73,6 +76,7 @@ final class Controller {
     /// instead of knocking on sudo every two seconds.
     private var autoStopFailed = false
     private var lidClosed = false
+    private var lidWatch = LidWatch()
     private var ticker: Timer?
     private var activity: NSObjectProtocol?
 
@@ -95,6 +99,12 @@ final class Controller {
         ruleIsCurrent = SleepSwitch.hasCurrentRule || !SleepSwitch.hasPasswordFreeAccess
         // The lid's state at launch is where we start from, not a change to act on.
         lidClosed = SleepSwitch.isLidClosedAndWouldSleep
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.willSleepNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.lidWatch.willSleep(at: Date()) }
+        }
 
         tick()
         // Every 2 s keeps the panel in step with a `nosleep` typed in the
@@ -197,6 +207,7 @@ final class Controller {
         undoLidActions()
         if let reason {
             lastStop = (Date(), reason)
+            lidWatch.stopped(reason, at: Date())
             let why = Self.describe(reason)
             record("Back to normal sleep", why)
             notify("Back to normal sleep", why)
@@ -205,6 +216,14 @@ final class Controller {
             record("Back to normal sleep", "switched off")
         }
         tick()
+    }
+
+    /// "awake the whole 42m", "ran 35m, then slept: timer ran out", "slept after 2m".
+    static func describe(_ report: LidWatch.Report) -> String {
+        let awake = Format.remaining(report.awake)
+        if report.stayedAwake { return "awake the whole \(awake)" }
+        if let stop = report.stop { return "ran \(awake), then slept: \(describe(stop))" }
+        return "slept after \(awake)"
     }
 
     static func describe(_ reason: Limits.StopReason) -> String {
@@ -281,9 +300,13 @@ final class Controller {
         let closed = SleepSwitch.isLidClosedAndWouldSleep
         guard closed != lidClosed else { return }
         lidClosed = closed
-        guard isAwake || mutedByUs else { return }
+        // Taken before the guard: a session that ended with the lid shut
+        // still owes the user an answer when it opens.
+        let report = closed ? nil : lidWatch.lidOpened(at: Date())
+        guard isAwake || mutedByUs || report != nil else { return }
 
         if closed {
+            lidWatch.lidClosed(at: Date())
             var done = ["display off"]
             SleepSwitch.displaySleepNow()
             if Audio.isMuted == false {
@@ -301,6 +324,11 @@ final class Controller {
             let hadLowPower = lowPowerOwned
             followLowPower(quiet: true)
             if hadLowPower, !lowPowerOwned { done.append("low power off") }
+            if let report {
+                done.insert(Self.describe(report), at: 0)
+                lastLid = report
+                tellAboutLid(report)
+            }
             record("Lid opened", done.isEmpty ? "still running" : done.joined(separator: " · "))
         }
     }
@@ -335,6 +363,17 @@ final class Controller {
     private func record(_ title: String, _ detail: String = "") {
         guard live else { return }
         log = SessionLog.append(SessionEvent(at: Date(), title: title, detail: detail), defaults)
+    }
+
+    /// Opening the lid is when the user wonders whether it worked. A stop has
+    /// had its own notification already, and a lid shut for a moment needs none.
+    private func tellAboutLid(_ report: LidWatch.Report) {
+        guard report.stop == nil, report.shut >= 120 else { return }
+        if report.stayedAwake {
+            notify("Your Mac stayed awake", "\(Format.remaining(report.awake)) with the lid shut.")
+        } else {
+            notify("Your Mac slept with the lid shut", "After \(Format.remaining(report.awake)). Check the Activity in Settings.")
+        }
     }
 
     private func notify(_ title: String, _ body: String) {
@@ -382,6 +421,7 @@ extension Controller {
         ruleIsCurrent: Bool = true,
         lastStop: (Date, Limits.StopReason)? = nil,
         problem: String? = nil,
+        lastLid: LidWatch.Report? = nil,
         log: [SessionEvent] = []
     ) -> Controller {
         let controller = Controller(defaults: UserDefaults(suiteName: "nosleep.preview")!, live: false)
@@ -403,6 +443,7 @@ extension Controller {
         controller.ruleIsCurrent = ruleIsCurrent
         controller.lastStop = lastStop.map { (at: $0.0, reason: $0.1) }
         controller.problem = problem
+        controller.lastLid = lastLid
         controller.log = log
         return controller
     }
