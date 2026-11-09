@@ -10,9 +10,6 @@ struct PanelView: View {
     var updater: Updater?
     var openSettings: () -> Void = {}
 
-    /// The sheet's corner, for the window's outline and shadow.
-    static let sheetRadius = GlassTile.sheetRadius
-
     var body: some View {
         GlassGroup {
             VStack(spacing: 10) {

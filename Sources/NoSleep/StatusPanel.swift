@@ -108,7 +108,7 @@ final class StatusPanel: NSObject {
         }
     }
 
-    /// Clear and borderless, its shape and shadow set by `SheetController`.
+    /// Clear and borderless; the shadow follows the glass sheet's own shape.
     private final class Panel: NSPanel {
         init() {
             super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel],
@@ -126,7 +126,7 @@ final class StatusPanel: NSObject {
             // A controller, so the window follows the panel's size as it changes.
             let host = NSHostingController(rootView: view)
             host.sizingOptions = [.preferredContentSize]
-            contentViewController = SheetController(host, cornerRadius: PanelView.sheetRadius)
+            contentViewController = host
         }
 
         // Key, so Esc closes it and ⌘, and ⌘Q reach its buttons.
@@ -138,64 +138,6 @@ final class StatusPanel: NSObject {
 
         override func cancelOperation(_ sender: Any?) {
             if let onCancel { onCancel() } else { orderOut(nil) }
-        }
-    }
-
-    /// Gives the window server the sheet's rounded outline. Traced from what a
-    /// clear window last drew, the shadow kept a stale square outline, seen
-    /// as a grey frame round the corners. AppKit's documented way to shape a
-    /// borderless window and its shadow is an `NSVisualEffectView` content
-    /// view with a `maskImage`: "If the visual effect view is the content view
-    /// of a window, the mask is applied in an appropriate way to the window's
-    /// shadow." The SwiftUI glass sheet draws over it, inside the same outline.
-    private final class SheetController: NSViewController {
-        private let host: NSViewController
-        private let cornerRadius: CGFloat
-
-        init(_ host: NSViewController, cornerRadius: CGFloat) {
-            self.host = host
-            self.cornerRadius = cornerRadius
-            super.init(nibName: nil, bundle: nil)
-        }
-
-        required init?(coder: NSCoder) { fatalError("not used") }
-
-        override func loadView() {
-            let effect = NSVisualEffectView()
-            effect.material = .popover
-            effect.blendingMode = .behindWindow
-            effect.state = .active
-            effect.maskImage = Self.mask(cornerRadius: cornerRadius)
-            addChild(host)
-            host.view.frame = effect.bounds
-            host.view.autoresizingMask = [.width, .height]
-            effect.addSubview(host.view)
-            view = effect
-            preferredContentSize = host.preferredContentSize
-        }
-
-        // The window follows this controller's size, so pass the panel's on.
-        override func preferredContentSizeDidChange(for viewController: NSViewController) {
-            super.preferredContentSizeDidChange(for: viewController)
-            preferredContentSize = viewController.preferredContentSize
-        }
-
-        /// The sheet's own continuous-corner rectangle, stretched between its
-        /// corners. A continuous corner runs about 1.53 radii along each edge,
-        /// so the caps are cut wider than the radius.
-        private static func mask(cornerRadius radius: CGFloat) -> NSImage {
-            let cap = (radius * 1.6).rounded(.up)
-            let edge = cap * 2 + 1
-            let image = NSImage(size: NSSize(width: edge, height: edge), flipped: false) { rect in
-                guard let context = NSGraphicsContext.current?.cgContext else { return false }
-                context.addPath(Path(roundedRect: rect, cornerRadius: radius, style: .continuous).cgPath)
-                context.setFillColor(.black)
-                context.fillPath()
-                return true
-            }
-            image.capInsets = NSEdgeInsets(top: cap, left: cap, bottom: cap, right: cap)
-            image.resizingMode = .stretch
-            return image
         }
     }
 
