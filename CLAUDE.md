@@ -31,6 +31,14 @@ that point (points from the built-in display's top-left), and
 (over the fold picture) for each, and exits without the quit-time restore;
 `NOSLEEP_LID_PROBE_ANGLES=24,18,10` holds those angles instead.
 
+The slap (debug build) can be checked without slapping.
+`NOSLEEP_SWAT_PROBE=<dir>` runs alone and writes `swat-<ms>.png` of the paw
+held at five moments of a swat, and `annoyed-<ms>.png` of the tail and 💢 at four (over `NOSLEEP_FOLD_PICTURE`, at
+`NOSLEEP_LID_POINTER`), then exits; the glass is left out of these, as in the
+snapshots. `NOSLEEP_SLAP_PROBE=10` runs the accelerometer alone for 10 s and
+prints its rate and each slap; `NOSLEEP_SLAP_LOG=1` prints the same from a
+normal run.
+
 Building needs full Xcode, not just the Command Line Tools: `actool` compiles
 `Resources/AppIcon.icon` (an Icon Composer bundle) into the Liquid Glass icon.
 
@@ -140,6 +148,20 @@ the cat alone until the user grants it again.
 **The fold is Mac Duo's** (MIT): the ported files keep its notice in a header,
 and THIRD-PARTY-NOTICES.md, which ships in the bundle, carries the licence.
 The curves match the home page's (`site/lib/laptop-scene.ts`); change both.
+
+**A slap gets a paw.** While NoSleep is on, `SlapEffect` reads the
+accelerometer (`Accelerometer`, NoSleepCore, ~800 Hz on its own thread) and
+`SlapDetector` picks slaps out of it: strong and fast in the same instant,
+which typing never is. A slap sends the lid cat's glass paw up from below
+the pointer's screen to swat at the pointer (`PawSwat`), in a window like the
+lid overlay's that is gone when the paw is. Slapped again within four
+seconds (`SlapMood`), the cat loses patience instead: its tail lashes up
+from a bottom corner and a 💢 pops up along the top (`TailSwish`,
+`AngerMark`). The tail is turned by turning its path each frame, never with
+`rotationEffect`: glass under a rotation is drawn away from its shape. The sensor runs only while
+NoSleep is on and the screens are awake, and is powered off again on stop;
+it needs no permission. Both sensor files are MacSlapApp's (MIT), with its
+notice in THIRD-PARTY-NOTICES.md.
 
 **The panel is the system's own UI.** Liquid Glass tiles (`glassEffect`), the
 native `Slider` and `Toggle`, the `.glass` button style. Don't draw custom

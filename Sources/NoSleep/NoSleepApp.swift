@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     let controller = Controller()
     let updater = Updater()
     let lidEffect = LidEffect()
+    let slapEffect = SlapEffect()
     private var statusPanel: StatusPanel?
     private var terminationSignal: DispatchSourceSignal?
     /// Quitting to make way for a newer copy, which takes the session over.
@@ -55,6 +56,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             }
             return
         }
+        if let seconds = ProcessInfo.processInfo.environment["NOSLEEP_SLAP_PROBE"].flatMap(TimeInterval.init) {
+            slapEffect.probeSensor(for: seconds)
+            return
+        }
+        // Alone too: a swat held still at a few moments, written as PNGs.
+        if let directory = ProcessInfo.processInfo.environment["NOSLEEP_SWAT_PROBE"] {
+            SlapEffect.probe(to: URL(fileURLWithPath: directory))
+            return
+        }
         #endif
 
         Backstop.install()
@@ -66,8 +76,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         updater.start()
         let statusPanel = StatusPanel(controller: controller, updater: updater, lidEffect: lidEffect)
         self.statusPanel = statusPanel
-        controller.onAwake = { [lidEffect] in lidEffect.setAwake($0) }
+        controller.onAwake = { [lidEffect, slapEffect] in
+            lidEffect.setAwake($0)
+            slapEffect.setAwake($0)
+        }
         lidEffect.setAwake(controller.isAwake)
+        slapEffect.setAwake(controller.isAwake)
         #if DEBUG
         if let directory = ProcessInfo.processInfo.environment["NOSLEEP_PANEL_PROBE"] {
             statusPanel.probe(to: URL(fileURLWithPath: directory))
@@ -90,6 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     /// relaunches the app: the new copy reads the same defaults and carries on.
     func applicationWillTerminate(_ notification: Notification) {
         lidEffect.stop()
+        slapEffect.stop()
         guard !relaunching else { return }
         controller.restoreIfOwned()
     }

@@ -153,7 +153,7 @@ final class LidOverlay {
     }
 }
 
-private final class OverlayWindow: NSWindow {
+final class OverlayWindow: NSWindow {
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
 }
@@ -371,7 +371,7 @@ private final class CatShapes {
 }
 
 /// The cat's body: real Liquid Glass over whatever is behind, on macOS 26.
-private struct CatGlass: View {
+struct CatGlass: View {
     let shape: PathShape
 
     var body: some View {
@@ -390,13 +390,13 @@ private struct CatGlass: View {
     #endif
 }
 
-private struct PathShape: Shape {
+struct PathShape: Shape {
     let path: Path
 
     func path(in rect: CGRect) -> Path { path }
 }
 
-private extension Color {
+extension Color {
     init(hex: UInt32) {
         self.init(.sRGB, red: Double((hex >> 16) & 0xff) / 255, green: Double((hex >> 8) & 0xff) / 255,
                   blue: Double(hex & 0xff) / 255)

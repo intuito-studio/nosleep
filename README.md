@@ -66,6 +66,14 @@ with the lid open as usual.
 The M1 MacBook Air and the M1/M2 MacBook Pro with Touch Bar don't report their
 lid angle, so they get no cat or fold. Everything else works the same.
 
+### Slapping the Mac
+
+During a session, slap the MacBook and the cat's paw comes up from below the
+screen to swat at the pointer. Slap it again within a few seconds and it loses
+patience: its tail lashes up from a corner and a 💢 pops up along the top. It
+reads the accelerometer of Apple silicon MacBooks (M1 Pro, M2 and later), needs
+no permission, and the sensor is off whenever NoSleep is.
+
 ### Safety rules
 
 - **Battery:** below 40% on battery, Low Power Mode goes on. At the stop you
@@ -108,6 +116,12 @@ The fold, the hinge angle maths and the lid sensor reader are ported from
 notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)). The lid angle
 sensor's HID interface was first documented by
 [Sam Henri Gold](https://github.com/samhenrigold/LidAngleSensor).
+
+The accelerometer reader and the slap detector are ported from
+[MacSlapApp](https://github.com/AbdullahFID/MacSlapApp) by Abdullah Khan (MIT;
+the notice is in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)), which built
+on [spank](https://github.com/taigrr/spank) and
+[apple-silicon-accelerometer](https://github.com/olvvier/apple-silicon-accelerometer).
 
 ## How it works
 

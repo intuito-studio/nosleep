@@ -48,7 +48,7 @@ private struct LidSection: View {
         } header: {
             Text("Lid")
         } footer: {
-            Text("While NoSleep is on, the cat comes up as the lid closes. Folding holds the desktop still while the lid turns around it, and needs Screen Recording.")
+            Text("While NoSleep is on, the cat comes up as the lid closes\(SlapEffect.isSupported ? "; slap the Mac and it swats at the pointer, slap it again and it loses patience" : ""). Folding holds the desktop still while the lid turns around it, and needs Screen Recording.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
