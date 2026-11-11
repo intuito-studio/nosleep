@@ -228,6 +228,30 @@ struct AnnoyedTests {
         }
     }
 
+    @Test("The 💢 is drawn, not typed: four crescents, one per corner, inside its size")
+    func markIsDrawn() {
+        var starts = 0
+        AngerMark.symbol.applyWithBlock { element in
+            if element.pointee.type == .moveToPoint { starts += 1 }
+        }
+        #expect(starts == 4)
+        var random = SystemRandomNumberGenerator()
+        let mark = AngerMark(width: screen.width, height: screen.height, using: &random)
+        let bounds = mark.path.boundingBoxOfPath
+        // Turned, its corners can reach a little past `size`, never past √2 of it.
+        #expect(bounds.width <= mark.size * 1.42 && bounds.height <= mark.size * 1.42)
+        #expect(abs(bounds.midX - mark.centre.x) < 1 && abs(bounds.midY - mark.centre.y) < 1)
+    }
+
+    @Test("Each 💢 is turned its own way, within 30° either side, never as far as an X")
+    func markTilt() {
+        var random = SystemRandomNumberGenerator()
+        let tilts = (0..<200).map { _ in AngerMark(width: screen.width, height: screen.height, using: &random).tilt }
+        #expect(tilts.allSatisfy { abs($0) <= .pi / 6 + 1e-9 })
+        #expect(Set(tilts).count > 150)
+        #expect(tilts.contains { $0 < -0.2 } && tilts.contains { $0 > 0.2 })
+    }
+
     @Test("The 💢 pops up, throbs, and is gone by the time the tail is")
     func markMotion() {
         var random = SystemRandomNumberGenerator()

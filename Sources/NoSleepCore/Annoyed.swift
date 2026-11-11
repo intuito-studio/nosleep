@@ -111,14 +111,20 @@ public struct TailSwish: Sendable {
 }
 
 /// The 💢, somewhere along the top of the screen, usually in a corner.
+/// Drawn as paths, never from the emoji font, so it looks the same on every
+/// macOS and never falls back to a missing-glyph box.
 public struct AngerMark: Sendable {
     /// Its centre, points from the top-left.
     public let centre: CGPoint
     /// Points across.
     public let size: Double
+    /// Turned a little, either way, so no two look stamped from one die.
+    public let tilt: Double
 
     public init(width: Double, height: Double, using random: inout some RandomNumberGenerator) {
         size = ScreenCatLayout(width: width, height: height).pawUnit * 0.6
+        // Short of 45°, where it would read as an X.
+        tilt = Double.random(in: -30...30, using: &random) * .pi / 180
         let corner = Double.random(in: 0..<1, using: &random) < 2.0 / 3
         let x: Double
         if corner {
@@ -133,6 +139,33 @@ public struct AngerMark: Sendable {
         let margin = size * 0.75
         centre = CGPoint(x: min(max(x * width, margin), width - margin), y: max(y * height, margin))
     }
+
+    /// The mark on a 2 × 2 grid centred on the origin, y down: four
+    /// crescents, one on each side, bowed in towards the centre with their
+    /// horns pointing out to the corners, as the 💢 emoji is drawn.
+    public static let symbol: CGPath = {
+        let path = CGMutablePath()
+        for quarter in 0..<4 {
+            let t = CGAffineTransform(rotationAngle: Double(quarter) * .pi / 2)
+            path.move(to: CGPoint(x: -0.65, y: -0.98), transform: t)
+            // The inner edge dips to -0.48 at the middle, the outer to -0.75.
+            path.addCurve(to: CGPoint(x: 0.65, y: -0.98), control1: CGPoint(x: -0.38, y: -0.31),
+                          control2: CGPoint(x: 0.38, y: -0.31), transform: t)
+            path.addCurve(to: CGPoint(x: -0.65, y: -0.98), control1: CGPoint(x: 0.3, y: -0.67),
+                          control2: CGPoint(x: -0.3, y: -0.67), transform: t)
+            path.closeSubpath()
+        }
+        return path
+    }()
+
+    /// The mark in points, `size` across, on its centre.
+    public var path: CGPath {
+        var t = CGAffineTransform(translationX: centre.x, y: centre.y).rotated(by: tilt).scaledBy(x: size / 2, y: size / 2)
+        return Self.symbol.copy(using: &t) ?? Self.symbol
+    }
+
+    /// The rounding on its points, in points: the crescents are stroked this wide too.
+    public var softening: Double { size * 0.03 }
 
     /// Pops up past its size and settles, throbs twice like a vein, then
     /// fades, within the tail's time. With `still`, it only fades.

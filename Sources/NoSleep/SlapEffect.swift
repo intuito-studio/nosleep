@@ -497,13 +497,26 @@ private struct AnnoyedView: View {
 
         var body: some View {
             let mark = state.mark
-            Text("💢")
-                .font(.system(size: mark.size * 0.8))
-                .shadow(color: .black.opacity(0.25), radius: mark.size * 0.06, y: mark.size * 0.03)
-                .frame(width: mark.size * 1.4, height: mark.size * 1.4)
-                .scaleEffect(state.markScale)
-                .opacity(state.markOpacity)
-                .position(mark.centre)
+            // Its own canvas, just big enough, so a throb scales a small picture.
+            let box = CGRect(x: mark.centre.x - mark.size, y: mark.centre.y - mark.size,
+                             width: mark.size * 2, height: mark.size * 2)
+            Canvas { context, _ in
+                context.translateBy(x: -box.minX, y: -box.minY)
+                let shape = Path(mark.path)
+                context.drawLayer { layer in
+                    layer.addFilter(.shadow(color: .black.opacity(0.3), radius: mark.size * 0.06, y: mark.size * 0.03))
+                    // A thin dark-red edge, then the red, its horns rounded off.
+                    layer.stroke(shape, with: .color(Color(hex: 0x6e140c)),
+                                 style: StrokeStyle(lineWidth: mark.softening + mark.size * 0.025, lineCap: .round, lineJoin: .round))
+                    layer.fill(shape, with: .color(Color(hex: 0xd3301f)))
+                    layer.stroke(shape, with: .color(Color(hex: 0xd3301f)),
+                                 style: StrokeStyle(lineWidth: mark.softening, lineCap: .round, lineJoin: .round))
+                }
+            }
+            .frame(width: box.width, height: box.height)
+            .scaleEffect(state.markScale)
+            .opacity(state.markOpacity)
+            .position(mark.centre)
         }
     }
 

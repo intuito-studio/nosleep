@@ -157,7 +157,8 @@ the pointer's screen to swat at the pointer (`PawSwat`), in a window like the
 lid overlay's that is gone when the paw is. Slapped again within four
 seconds (`SlapMood`), the cat loses patience instead: its tail lashes up
 from a bottom corner and a 💢 pops up along the top (`TailSwish`,
-`AngerMark`). The tail is turned by turning its path each frame, never with
+`AngerMark`). The 💢 is drawn as paths, the emoji's four crescents tilted a
+random way up to 30°, never typed from the emoji font. The tail is turned by turning its path each frame, never with
 `rotationEffect`: glass under a rotation is drawn away from its shape. The sensor runs only while
 NoSleep is on and the screens are awake, and is powered off again on stop;
 it needs no permission. Both sensor files are MacSlapApp's (MIT), with its
